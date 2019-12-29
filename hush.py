@@ -176,6 +176,50 @@ def keygen(name, bits, passphrase):
     with open(public_file_name, "wb") as f:
         f.write(public_key)
     click.echo(
-        f"Private key stored in {private_file_name},' \
-        'public key stored in {public_file_name}"
+        f"Private key stored in {private_file_name}, "
+        f"public key stored in {public_file_name}"
     )
+
+
+def abort_if_false(ctx, param, value):
+    if not value:
+        ctx.abort()
+
+
+@cli.command(help="Add/remove/change passprase in the private key file")
+@click.option(
+    "-r",
+    "--private-key-file",
+    type=str,
+    required=True,
+    help="Existing private key file",
+)
+@click.option(
+    "--yes",
+    is_flag=True,
+    callback=abort_if_false,
+    expose_value=False,
+    prompt="Are you sure you want to overwrite the passphrase?",
+)
+def passphrase(private_key_file):
+    if not os.path.exists(private_key_file):
+        raise click.UsageError("File does not exist")
+    secret = getpass.getpass("Existing passphrase, [ENTER] if None ")
+    if not secret:
+        secret = None
+    with open(private_key_file, "rb") as f:
+        key = RSA.importKey(f.read(), secret)
+    new_secret = getpass.getpass("New passphrase, [ENTER] if none")
+    new_secret2 = getpass.getpass("Repeat new passphrase")
+    if new_secret != new_secret2:
+        raise click.UsageError("Passphrases don't match")
+    if not new_secret:
+        new_secret = None
+    private_key = key.export_key(
+        format="PEM",
+        passphrase=new_secret,
+        pkcs=8,
+        protection="scryptAndAES128-CBC",
+    )
+    with open(private_key_file, "wb") as f:
+        f.write(private_key)
