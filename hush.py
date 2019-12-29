@@ -12,31 +12,19 @@ import click
 
 from dotenv import load_dotenv
 
-
-class Context:
-    def __init__(self):
-        self.public_key_file = None
-        self.private_key_file = None
-
-
 dotenv_file = os.path.join(os.getcwd(), ".env")
 if os.path.exists(dotenv_file):
     load_dotenv(dotenv_file)
 
 
-context = click.make_pass_decorator(Context, ensure=True)
-
-
 @click.group()
 @click.version_option(".5.1")
-@context
-def cli(context):
+def cli():
     """ cli to interact with hush"""
     pass
 
 
 @cli.command(help="Encrypt a secret")
-@context
 @click.option(
     "-p",
     "--public-key-file",
@@ -46,7 +34,7 @@ def cli(context):
     help="The file containing the public key, for encryption",
 )
 @click.argument("file", type=click.File("rb"), required=True, default="-")
-def encrypt(context, public_key_file, file):
+def encrypt(public_key_file, file):
     data = file.read()
 
     public_key = RSA.import_key(public_key_file.read())
