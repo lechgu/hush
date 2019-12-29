@@ -28,7 +28,7 @@ context = click.make_pass_decorator(Context, ensure=True)
 
 
 @click.group()
-@click.version_option(".5")
+@click.version_option(".5.1")
 @click.option(
     "-p",
     "--public-key-file",
