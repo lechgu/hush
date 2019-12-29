@@ -29,6 +29,14 @@ context = click.make_pass_decorator(Context, ensure=True)
 
 @click.group()
 @click.version_option(".5.1")
+@context
+def cli(context):
+    """ cli to interact with hush"""
+    pass
+
+
+@cli.command(help="Encrypt a secret")
+@context
 @click.option(
     "-p",
     "--public-key-file",
@@ -37,28 +45,11 @@ context = click.make_pass_decorator(Context, ensure=True)
     envvar="HUSH_PUBLIC_KEY_FILE",
     help="The file containing the public key, for encryption",
 )
-@click.option(
-    "-r",
-    "--private-key-file",
-    type=click.File(),
-    required=True,
-    envvar="HUSH_PRIVATE_KEY_FILE",
-    help="The file containing the private key, for decryption",
-)
-@context
-def cli(context, public_key_file, private_key_file):
-    """ cli to interact with hush"""
-    context.public_key_file = public_key_file
-    context.private_key_file = private_key_file
-
-
-@cli.command(help="Encrypt a secret")
-@context
 @click.argument("file", type=click.File("rb"), required=True, default="-")
-def encrypt(context, file):
+def encrypt(context, public_key_file, file):
     data = file.read()
 
-    public_key = RSA.import_key(context.public_key_file.read())
+    public_key = RSA.import_key(public_key_file.read())
     session_key = get_random_bytes(16)
     cipher_aes = AES.new(session_key, AES.MODE_EAX)
     nonce = cipher_aes.nonce
@@ -75,12 +66,19 @@ def encrypt(context, file):
 
 
 @cli.command(help="Decrypt the secret")
-@context
+@click.option(
+    "-r",
+    "--private-key-file",
+    type=click.File(),
+    required=True,
+    envvar="HUSH_PRIVATE_KEY_FILE",
+    help="The file containing the private key, for decryption",
+)
 @click.argument("file", type=click.File("rb"), required=True, default="-")
-def decrypt(context, file):
+def decrypt(private_key_file, file):
     ciphertext_base64 = file.read()
     buffer = base64.b64decode(ciphertext_base64)
-    private_key = RSA.import_key(context.private_key_file.read())
+    private_key = RSA.import_key(private_key_file.read())
     enc_session_key = buffer[: private_key.size_in_bytes()]
     nonce = buffer[
         private_key.size_in_bytes() : private_key.size_in_bytes() + 16
