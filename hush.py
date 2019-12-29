@@ -1,5 +1,6 @@
 import base64
 import os
+import random
 import secrets
 import string
 
@@ -101,14 +102,58 @@ def decrypt(private_key_file, file):
     """,  # noqa
 )
 def generate(length, character_classes):
+    if length < len(character_classes):
+        raise click.UsageError("password too short")
     alphabet = ""
+    pwd = []
     if "a" in character_classes:
         alphabet += string.ascii_lowercase
+        pwd += secrets.choice(string.ascii_lowercase)
     if "A" in character_classes:
         alphabet += string.ascii_uppercase
+        pwd += secrets.choice(string.ascii_uppercase)
     if "8" in character_classes:
         alphabet += string.digits
+        pwd += secrets.choice(string.digits)
     if "#" in character_classes:
-        alphabet += r"~!@#$%^&*_-+=|\(){}[]:;<>,.?/"
-    pwd = "".join(secrets.choice(alphabet) for x in range(length))
-    click.echo(pwd)
+        non_alphahumerical = r"~!@#$%^&*_-+=|\(){}[]:;<>,.?/"
+        alphabet += non_alphahumerical
+        pwd += secrets.choice(non_alphahumerical)
+    random.shuffle(pwd)
+    pwd += [secrets.choice(alphabet) for x in range(length - len(pwd))]
+    click.echo("".join(pwd))
+
+
+@cli.command(help="Generate RSA private/public key pair")
+@click.option(
+    "-n", "--name", type=str, required=True, help="base file name for keys"
+)
+@click.option(
+    "-b",
+    "--bits",
+    type=click.Choice(["1024", "2048", "3072"]),
+    default="2048",
+    help="key length size, in bits, by default 2048",
+)
+@click.option(
+    "-p",
+    "--passphrase",
+    is_flag=True,
+    default=False,
+    help="Prompt for the keyphrase",
+)
+def keygen(name, bits, passphrase):
+    length = int(bits)
+    private_file_name = f"{name}.pri"
+    public_file_name = f"{name}.pub"
+    key = RSA.generate(length)
+    private_key = key.export_key()
+    with open(private_file_name, "wb") as f:
+        f.write(private_key)
+    public_key = key.publickey().export_key()
+    with open(public_file_name, "wb") as f:
+        f.write(public_key)
+    click.echo(
+        f"Private key stored in {private_file_name},' \
+        'public key stored in {public_file_name}"
+    )
