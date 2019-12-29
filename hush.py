@@ -1,4 +1,5 @@
 import base64
+import getpass
 import os
 import random
 import secrets
@@ -63,11 +64,21 @@ def encrypt(public_key_file, file):
     envvar="HUSH_PRIVATE_KEY_FILE",
     help="The file containing the private key, for decryption",
 )
+@click.option(
+    "-P",
+    "--passphrase",
+    is_flag=True,
+    default=False,
+    help="prompt for the private key passphrase",
+)
 @click.argument("file", type=click.File("rb"), required=True, default="-")
-def decrypt(private_key_file, file):
+def decrypt(private_key_file, passphrase, file):
+    secret = None
+    if passphrase:
+        secret = getpass.getpass("Enter the passphrase: ")
     ciphertext_base64 = file.read()
     buffer = base64.b64decode(ciphertext_base64)
-    private_key = RSA.import_key(private_key_file.read())
+    private_key = RSA.import_key(private_key_file.read(), secret)
     enc_session_key = buffer[: private_key.size_in_bytes()]
     nonce = buffer[
         private_key.size_in_bytes() : private_key.size_in_bytes() + 16
@@ -126,7 +137,7 @@ def generate(length, character_classes):
 
 @cli.command(help="Generate RSA private/public key pair")
 @click.option(
-    "-n", "--name", type=str, required=True, help="base file name for keys"
+    "-n", "--name", type=str, default="rsa", help="base file name for keys"
 )
 @click.option(
     "-b",
@@ -136,18 +147,29 @@ def generate(length, character_classes):
     help="key length size, in bits, by default 2048",
 )
 @click.option(
-    "-p",
+    "-P",
     "--passphrase",
     is_flag=True,
     default=False,
-    help="Prompt for the keyphrase",
+    help="prompt for the private key passphrase",
 )
 def keygen(name, bits, passphrase):
+    secret = None
+    if passphrase:
+        secret = getpass.getpass(
+            "Enter desired passphrase, [ENTER for none]: "
+        )
+        if secret:
+            secret2 = getpass.getpass("Repeat passphrase: ")
+            if secret != secret2:
+                raise click.UsageError("Passphrases don't match")
+        else:
+            secret = None
     length = int(bits)
     private_file_name = f"{name}.pri"
     public_file_name = f"{name}.pub"
     key = RSA.generate(length)
-    private_key = key.export_key()
+    private_key = key.export_key("PEM", secret)
     with open(private_file_name, "wb") as f:
         f.write(private_key)
     public_key = key.publickey().export_key()
