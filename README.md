@@ -17,7 +17,7 @@ pip3 install hush
 or, depending on your python setup:
 
 ```
-pip install hash
+pip install hush
 ```
 
 verify that hush is installed on your box by running:
