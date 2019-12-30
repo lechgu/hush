@@ -1,8 +1,21 @@
+import os
 import string
+import tempfile
 
 from click.testing import CliRunner
 
 from hush import cli
+
+import pytest
+
+
+@pytest.fixture()
+def keypair():
+    runner = CliRunner()
+    runner.invoke(cli, "keygen")
+    yield "rsa.pub"
+    os.remove("rsa.pub")
+    os.remove("rsa.pri")
 
 
 def test_version():
@@ -19,37 +32,47 @@ def test_generate_default():
 
 def test_generate_lowercase():
     runner = CliRunner()
-    output = runner.invoke(cli, "generate -c a").output.strip()
+    result = runner.invoke(cli, ["generate", "-c", "a"])
+    assert result.exit_code == 0
+    output = result.output.strip()
     assert len(output) == 16
     assert all([x in string.ascii_lowercase for x in output])
 
 
 def test_generate_uppercase():
     runner = CliRunner()
-    output = runner.invoke(cli, "generate -c A").output.strip()
+    result = runner.invoke(cli, ["generate", "-c", "A"])
+    assert result.exit_code == 0
+    output = result.output.strip()
     assert len(output) == 16
     assert all([x in string.ascii_uppercase for x in output])
 
 
 def test_generate_digits():
     runner = CliRunner()
-    output = runner.invoke(cli, "generate -c 8").output.strip()
+    result = runner.invoke(cli, ["generate", "-c", "8"])
+    assert result.exit_code == 0
+    output = result.output.strip()
     assert len(output) == 16
     assert all([x in string.digits for x in output])
 
 
 def test_generate_nonalphanumeric():
     runner = CliRunner()
+    result = runner.invoke(cli, ["generate", "-c", "#"])
+    assert result.exit_code == 0
+    output = result.output.strip()
     nonalphanumeric = r"~!@#$%^&*_-+=|\(){}[]:;<>,.?/"
-    output = runner.invoke(cli, "generate -c #").output.strip()
     assert len(output) == 16
     assert all([x in nonalphanumeric for x in output])
 
 
 def test_generate_mixed_classes():
     runner = CliRunner()
+    result = runner.invoke(cli, ["generate", "-c", "aA8#"])
+    assert result.exit_code == 0
+    output = result.output.strip()
     nonalphanumeric = r"~!@#$%^&*_-+=|\(){}[]:;<>,.?/"
-    output = runner.invoke(cli, "generate -c aA8#").output.strip()
     assert any([x in string.ascii_lowercase for x in output])
     assert any([x in string.ascii_uppercase for x in output])
     assert any([x in string.digits for x in output])
@@ -58,6 +81,19 @@ def test_generate_mixed_classes():
 
 def test_generate_len():
     runner = CliRunner()
-    output = runner.invoke(cli, "generate -l 42").output.strip()
-    assert len(output) == 42
+    result = runner.invoke(cli, "generate -l 42")
+    assert result.exit_code == 0
+    assert len(result.output.strip()) == 42
 
+
+def test_encrypt(keypair):
+    runner = CliRunner()
+    output = runner.invoke(cli, "encrypt -p rsa.pub README.md").output.strip()
+    assert len(output) > 0
+
+
+# def test_decrypt(keypair):
+#     runner = CliRunner()
+#     output = runner.invoke(cli, "encrypt -p rsa.pub README.md").output.strip()
+#     with tempfile.NamedTemporaryFile() as f:
+#         f.wr
