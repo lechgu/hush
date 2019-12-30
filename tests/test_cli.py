@@ -92,8 +92,8 @@ def test_encrypt(keypair):
     assert len(output) > 0
 
 
-# def test_decrypt(keypair):
-#     runner = CliRunner()
-#     output = runner.invoke(cli, "encrypt -p rsa.pub README.md").output.strip()
-#     with tempfile.NamedTemporaryFile() as f:
-#         f.wr
+def test_decrypt(keypair):
+    runner = CliRunner()
+    output = runner.invoke(cli, "encrypt -p rsa.pub README.md").output.strip()
+    with tempfile.NamedTemporaryFile() as f:
+        f.write(output.encode())
