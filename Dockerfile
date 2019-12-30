@@ -9,4 +9,4 @@ RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-
 RUN python3 $HOME/.poetry/bin/poetry build
 RUN pip3 install dist/hush-0.5.1-py3-none-any.whl
 RUN apk --purge del .build-deps
-ENTRYPOINT  [ "hush" ]
+CMD  [ "hush" ]
