@@ -10,7 +10,11 @@ from hush import cli
 @contextmanager
 def keypair(name="rsa", passphrase=None):
     runner = CliRunner()
-    args = ["keygen", "-n", name]
+    args = (
+        ["keygen", "-n", name, "-s", passphrase]
+        if passphrase
+        else ["keygen", "-n", name]
+    )
     runner.invoke(cli, args)
     yield
     os.remove(f"{name}.pub")
@@ -110,3 +114,17 @@ def test_keygen_name():
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
 
+
+def test_keygen_passphrase():
+    with keypair(passphrase="bar"):
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["encrypt", "-p", "rsa.pub"], input="secret"
+        )
+        assert result.exit_code == 0
+        output = result.output
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-s", "bar"], input=output
+        )
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"
