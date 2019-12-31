@@ -8,9 +8,10 @@ from hush import cli
 
 
 @contextmanager
-def keypair(name="rsa"):
+def keypair(name="rsa", passphrase=None):
     runner = CliRunner()
-    runner.invoke(cli, ["keygen", "-n", name])
+    args = ["keygen", "-n", name]
+    runner.invoke(cli, args)
     yield
     os.remove(f"{name}.pub")
     os.remove(f"{name}.pri")
@@ -96,8 +97,9 @@ def test_encrypt_decrypt():
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
 
+
 def test_keygen_name():
-    with keypair(name='foo'):
+    with keypair(name="foo"):
         runner = CliRunner()
         result = runner.invoke(
             cli, ["encrypt", "-p", "foo.pub"], input="secret"
