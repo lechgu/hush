@@ -148,14 +148,25 @@ def generate(length, character_classes):
 )
 @click.option(
     "-P",
-    "--passphrase",
+    "--ask-passphrase",
     is_flag=True,
     default=False,
     help="prompt for the private key passphrase",
 )
-def keygen(name, bits, passphrase):
-    secret = None
-    if passphrase:
+@click.option(
+    "-p",
+    "--passphrase",
+    type=str,
+    default=None,
+    help="private key passphrase",
+)
+def keygen(name, bits, ask_passphrase, passphrase):
+    if passphrase and ask_passphrase:
+        raise click.UsageError(
+            "only one of 'passphrase' or 'ask-passphrase' options can be set"
+        )
+    secret = passphrase
+    if ask_passphrase:
         secret = getpass.getpass(
             "Enter desired passphrase, [ENTER for none]: "
         )
