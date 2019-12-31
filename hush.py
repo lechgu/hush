@@ -65,16 +65,27 @@ def encrypt(public_key_file, file):
     help="The file containing the private key, for decryption",
 )
 @click.option(
-    "-P",
-    "--passphrase",
+    "-S",
+    "--ask-passphrase",
     is_flag=True,
     default=False,
     help="prompt for the private key passphrase",
 )
+@click.option(
+    "-s",
+    "--passphrase",
+    type=str,
+    default=None,
+    help="the private key passphrase",
+)
 @click.argument("file", type=click.File("rb"), required=True, default="-")
-def decrypt(private_key_file, passphrase, file):
-    secret = None
-    if passphrase:
+def decrypt(private_key_file, ask_passphrase, passphrase, file):
+    if ask_passphrase and passphrase:
+        raise click.UsageError(
+            "only one of the 'passphrase' and 'ask-passphrase' can be set "
+        )
+    secret = passphrase
+    if ask_passphrase:
         secret = getpass.getpass("Enter the passphrase: ")
     ciphertext_base64 = file.read()
     buffer = base64.b64decode(ciphertext_base64)
@@ -147,14 +158,14 @@ def generate(length, character_classes):
     help="key length size, in bits, by default 2048",
 )
 @click.option(
-    "-P",
+    "-S",
     "--ask-passphrase",
     is_flag=True,
     default=False,
     help="prompt for the private key passphrase",
 )
 @click.option(
-    "-p",
+    "-s",
     "--passphrase",
     type=str,
     default=None,
