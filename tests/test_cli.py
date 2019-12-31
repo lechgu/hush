@@ -81,19 +81,25 @@ def test_generate_mixed_classes():
 
 def test_generate_len():
     runner = CliRunner()
-    result = runner.invoke(cli, "generate -l 42")
+    result = runner.invoke(cli, ["generate", "-l", "42"])
     assert result.exit_code == 0
     assert len(result.output.strip()) == 42
 
 
 def test_encrypt(keypair):
     runner = CliRunner()
-    output = runner.invoke(cli, "encrypt -p rsa.pub README.md").output.strip()
+    result = runner.invoke(cli, ["encrypt", "-p", "rsa.pub", "README.md"])
+    assert result.exit_code == 0
+    output = result.output.strip()
     assert len(output) > 0
 
 
 def test_decrypt(keypair):
     runner = CliRunner()
-    output = runner.invoke(cli, "encrypt -p rsa.pub README.md").output.strip()
-    with tempfile.NamedTemporaryFile() as f:
-        f.write(output.encode())
+    result = runner.invoke(cli, ["encrypt", "-p", "rsa.pub"], input="foo")
+    assert result.exit_code == 0
+    output = result.output
+    result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
+    assert result.exit_code == 0
+    assert result.output.strip() == "foo"
+
