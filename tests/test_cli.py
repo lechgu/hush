@@ -128,3 +128,25 @@ def test_keygen_passphrase():
         )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
+
+
+def test_add_passphrase():
+    with keypair():
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["encrypt", "-p", "rsa.pub"], input="secret"
+        )
+        assert result.exit_code == 0
+        output = result.output
+        result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"
+        result = runner.invoke(
+            cli, ["passphrase", "-r", "rsa.pri", "-s", "boo", "--yes"]
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-s", "boo"], input=output
+        )
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"

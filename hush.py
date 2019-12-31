@@ -217,60 +217,23 @@ def abort_if_false(ctx, param, value):
     help="Existing private key file",
 )
 @click.option(
-    "-o",
-    "--old-passphrase",
-    type=str,
-    default=None,
-    help="passphrase for the private key",
-)
-@click.option(
-    "-s",
-    "--passphrase",
-    type=str,
-    default=None,
-    help="passphrase for the private key",
-)
-@click.option(
-    "-S",
-    "--ask-phassphrase",
-    is_flag=True,
-    default=False,
-    help="prompt for the passphrase",
-)
-@click.option(
     "--yes",
     is_flag=True,
-    callback=abort_if_false,
-    expose_value=False,
-    prompt="Are you sure you want to overwrite the passphrase?",
+    default=False,
+    help="Overwrite existing file",
+    prompt="This will overwrite the private key file. continue?",
 )
-def passphrase(private_key_file, old_passphrase, passphrase, ask_passphrase):
-    if passphrase and ask_passphrase:
-        raise click.UsageError(
-            "Only on of 'passphrase and 'ask-passphrase' can be set"
-        )
-    if not os.path.exists(private_key_file):
-        raise click.UsageError("File does not exist")
-    secret = old_passphrase
-    if ask_passphrase:
-        secret = getpass.getpass("Existing passphrase, [ENTER] if None ")
-    if not secret:
-        secret = None
+@click.option("-o", "--old-passphrase", default=None, help="old passphrase")
+@click.option("-s", "--new-passphrase", default=None, help="new passphrase")
+def passphrase(private_key_file, yes, old_passphrase, new_passphrase):
+    if not yes:
+        return
     with open(private_key_file, "rb") as f:
-        key = RSA.importKey(f.read(), secret)
-    new_secret = passphrase
-    if ask_passphrase:
-        new_secret = getpass.getpass("New passphrase, [ENTER] if none")
-        new_secret2 = getpass.getpass("Repeat new passphrase")
-        if new_secret != new_secret2:
-            raise click.UsageError("Passphrases don't match")
-    if not new_secret:
-        new_secret = None
+        key = RSA.importKey(f.read(), old_passphrase)
     private_key = key.export_key(
-        format="PEM",
-        passphrase=new_secret,
-        pkcs=8,
-        protection="scryptAndAES128-CBC",
+        passphrase=new_passphrase, pkcs=8, protection="scryptAndAES128-CBC"
     )
+
     with open(private_key_file, "wb") as f:
         f.write(private_key)
+
