@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import os
 import string
 
@@ -5,10 +6,8 @@ from click.testing import CliRunner
 
 from hush import cli
 
-import pytest
 
-
-@pytest.fixture()
+@contextmanager
 def keypair():
     runner = CliRunner()
     runner.invoke(cli, "keygen")
@@ -85,19 +84,14 @@ def test_generate_len():
     assert len(result.output.strip()) == 42
 
 
-def test_encrypt(keypair):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["encrypt", "-p", "rsa.pub"], input="secret")
-    assert result.exit_code == 0
-    output = result.output.strip()
-    assert len(output) > 0
-
-
-def test_decrypt(keypair):
-    runner = CliRunner()
-    result = runner.invoke(cli, ["encrypt", "-p", "rsa.pub"], input="secret")
-    assert result.exit_code == 0
-    output = result.output
-    result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
-    assert result.exit_code == 0
-    assert result.output.strip() == "secret"
+def test_encrypt_decrypt():
+    with keypair() as k:
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["encrypt", "-p", "rsa.pub"], input="secret"
+        )
+        assert result.exit_code == 0
+        output = result.output
+        result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"
