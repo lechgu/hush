@@ -173,3 +173,28 @@ def test_strip_passphrase():
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
 
+
+def test_change_passphrase():
+    with keypair(passphrase="foo"):
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["encrypt", "-p", "rsa.pub"], input="secret"
+        )
+        assert result.exit_code == 0
+        output = result.output
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-s", "foo"], input=output
+        )
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"
+        result = runner.invoke(
+            cli,
+            ["passphrase", "-r", "rsa.pri", "--yes", "-o", "foo", "-s", "bar"],
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-s", "bar"], input=output
+        )
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"
+
