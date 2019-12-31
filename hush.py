@@ -217,6 +217,13 @@ def abort_if_false(ctx, param, value):
     help="Existing private key file",
 )
 @click.option(
+    "-o",
+    "--old-passphrase",
+    type=str,
+    default=None,
+    help="passphrase for the private key",
+)
+@click.option(
     "-s",
     "--passphrase",
     type=str,
@@ -237,18 +244,26 @@ def abort_if_false(ctx, param, value):
     expose_value=False,
     prompt="Are you sure you want to overwrite the passphrase?",
 )
-def passphrase(private_key_file):
+def passphrase(private_key_file, old_passphrase, passphrase, ask_passphrase):
+    if passphrase and ask_passphrase:
+        raise click.UsageError(
+            "Only on of 'passphrase and 'ask-passphrase' can be set"
+        )
     if not os.path.exists(private_key_file):
         raise click.UsageError("File does not exist")
-    secret = getpass.getpass("Existing passphrase, [ENTER] if None ")
+    secret = old_passphrase
+    if ask_passphrase:
+        secret = getpass.getpass("Existing passphrase, [ENTER] if None ")
     if not secret:
         secret = None
     with open(private_key_file, "rb") as f:
         key = RSA.importKey(f.read(), secret)
-    new_secret = getpass.getpass("New passphrase, [ENTER] if none")
-    new_secret2 = getpass.getpass("Repeat new passphrase")
-    if new_secret != new_secret2:
-        raise click.UsageError("Passphrases don't match")
+    new_secret = passphrase
+    if ask_passphrase:
+        new_secret = getpass.getpass("New passphrase, [ENTER] if none")
+        new_secret2 = getpass.getpass("Repeat new passphrase")
+        if new_secret != new_secret2:
+            raise click.UsageError("Passphrases don't match")
     if not new_secret:
         new_secret = None
     private_key = key.export_key(
