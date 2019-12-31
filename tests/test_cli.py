@@ -1,6 +1,5 @@
 import os
 import string
-import tempfile
 
 from click.testing import CliRunner
 
@@ -88,7 +87,7 @@ def test_generate_len():
 
 def test_encrypt(keypair):
     runner = CliRunner()
-    result = runner.invoke(cli, ["encrypt", "-p", "rsa.pub", "README.md"])
+    result = runner.invoke(cli, ["encrypt", "-p", "rsa.pub"], input="secret")
     assert result.exit_code == 0
     output = result.output.strip()
     assert len(output) > 0
@@ -96,10 +95,9 @@ def test_encrypt(keypair):
 
 def test_decrypt(keypair):
     runner = CliRunner()
-    result = runner.invoke(cli, ["encrypt", "-p", "rsa.pub"], input="foo")
+    result = runner.invoke(cli, ["encrypt", "-p", "rsa.pub"], input="secret")
     assert result.exit_code == 0
     output = result.output
     result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
     assert result.exit_code == 0
-    assert result.output.strip() == "foo"
-
+    assert result.output.strip() == "secret"
