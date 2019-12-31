@@ -1,6 +1,6 @@
-from contextlib import contextmanager
 import os
 import string
+from contextlib import contextmanager
 
 from click.testing import CliRunner
 
@@ -8,12 +8,12 @@ from hush import cli
 
 
 @contextmanager
-def keypair():
+def keypair(name="rsa"):
     runner = CliRunner()
-    runner.invoke(cli, "keygen")
-    yield "rsa.pub"
-    os.remove("rsa.pub")
-    os.remove("rsa.pri")
+    runner.invoke(cli, ["keygen", "-n", name])
+    yield
+    os.remove(f"{name}.pub")
+    os.remove(f"{name}.pri")
 
 
 def test_version():
@@ -85,7 +85,7 @@ def test_generate_len():
 
 
 def test_encrypt_decrypt():
-    with keypair() as k:
+    with keypair():
         runner = CliRunner()
         result = runner.invoke(
             cli, ["encrypt", "-p", "rsa.pub"], input="secret"
