@@ -225,9 +225,30 @@ def abort_if_false(ctx, param, value):
 )
 @click.option("-o", "--old-passphrase", default=None, help="old passphrase")
 @click.option("-s", "--new-passphrase", default=None, help="new passphrase")
-def passphrase(private_key_file, yes, old_passphrase, new_passphrase):
+@click.option(
+    "-S",
+    "--ask-passphrase",
+    is_flag=True,
+    default=False,
+    help="prompt for the private key passphrase",
+)
+def passphrase(
+    private_key_file, yes, old_passphrase, new_passphrase, ask_passphrase
+):
     if not yes:
         return
+    if ask_passphrase:
+        if old_passphrase or new_passphrase:
+            raise click.UsageError(
+                "cannot specify passphrases if 'ask-passphrase' is set"
+            )
+        old_passphrase = getpass.getpass("Old passphrase? [ENTER] if empty:")
+        new_passphrase = getpass.getpass("New passphrase? [ENTER] if empty:")
+        new_passphrase2 = getpass.getpass("Repeat new passphrase:")
+        if new_passphrase != new_passphrase2:
+            raise click.UsageError("Passphrases don't match")
+        if not new_passphrase:
+            new_passphrase = None
     with open(private_key_file, "rb") as f:
         key = RSA.importKey(f.read(), old_passphrase)
     private_key = key.export_key(
