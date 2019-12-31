@@ -236,4 +236,3 @@ def passphrase(private_key_file, yes, old_passphrase, new_passphrase):
 
     with open(private_key_file, "wb") as f:
         f.write(private_key)
-

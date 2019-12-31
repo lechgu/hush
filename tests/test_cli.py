@@ -215,4 +215,3 @@ def test_change_passphrase_empty():
         result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
-
