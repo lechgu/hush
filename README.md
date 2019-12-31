@@ -6,6 +6,12 @@ hush is a minimalistic command line password manager.
 It was developed to satisfy the need to manage passwords and other secrets so they can be stored securely in the text format, compatible with git and onther version control. systems.
 Hush does not require a master password as other password managers do, instead it uses RSA public/private key pair to encrypt and decrypt passwords. These are exactly same keys used for ssh connectons to the github and similar.
 
+#### What's new?
+
+- Version 0.5.1 (Dec 31, 2019)
+  - support for generating RSA key pair
+  - support for the private key passphrase, for extra security
+
 ### installation
 
 hush requires Python 3.7 or newer installation; to install hush, execute:
