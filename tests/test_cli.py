@@ -95,3 +95,16 @@ def test_encrypt_decrypt():
         result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
+
+def test_keygen_name():
+    with keypair(name='foo'):
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["encrypt", "-p", "foo.pub"], input="secret"
+        )
+        assert result.exit_code == 0
+        output = result.output
+        result = runner.invoke(cli, ["decrypt", "-r", "foo.pri"], input=output)
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"
+
