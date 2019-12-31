@@ -217,6 +217,20 @@ def abort_if_false(ctx, param, value):
     help="Existing private key file",
 )
 @click.option(
+    "-s",
+    "--passphrase",
+    type=str,
+    default=None,
+    help="passphrase for the private key",
+)
+@click.option(
+    "-S",
+    "--ask-phassphrase",
+    is_flag=True,
+    default=False,
+    help="prompt for the passphrase",
+)
+@click.option(
     "--yes",
     is_flag=True,
     callback=abort_if_false,
