@@ -9,9 +9,13 @@ Hush does not require a master password as other password managers do, instead i
 #### What's new?
 
 - Version 0.5.2 (Jan 1, 2020)
+<<<<<<< HEAD
+  - repackage to allow cli-less usage
+=======
 
   - repackage to allow cli-less usage
 
+>>>>>>> master
 - Version 0.5.1 (Dec 31, 2019)
   - support for generating RSA key pair
   - support for the private key passphrase, for extra security

@@ -25,10 +25,14 @@ def test_version():
     runner = CliRunner()
     output = runner.invoke(cli, "--version").output.strip()
 <<<<<<< HEAD
+    assert "5.2" in output
+=======
+<<<<<<< HEAD
     assert "5.1" in output
 =======
     assert "5.2" in output
 >>>>>>> devel
+>>>>>>> master
 
 
 def test_generate_default():
