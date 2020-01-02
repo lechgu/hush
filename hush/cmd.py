@@ -7,7 +7,7 @@ import click
 
 from dotenv import load_dotenv
 
-from . import passwords, keypairs, secrets
+from . import keypairs, passwords, secrets
 
 
 dotenv_file = os.path.join(os.getcwd(), ".env")

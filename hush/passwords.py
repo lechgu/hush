@@ -1,24 +1,24 @@
-import random
-import secrets
-import string
+import random as _random
+import secrets as _secrets
+import string as _string
 
 
 def generate(length, character_classes):
     alphabet = ""
     pwd = []
     if "a" in character_classes:
-        alphabet += string.ascii_lowercase
-        pwd += secrets.choice(string.ascii_lowercase)
+        alphabet += _string.ascii_lowercase
+        pwd += _secrets.choice(_string.ascii_lowercase)
     if "A" in character_classes:
-        alphabet += string.ascii_uppercase
-        pwd += secrets.choice(string.ascii_uppercase)
+        alphabet += _string.ascii_uppercase
+        pwd += _secrets.choice(_string.ascii_uppercase)
     if "8" in character_classes:
-        alphabet += string.digits
-        pwd += secrets.choice(string.digits)
+        alphabet += _string.digits
+        pwd += _secrets.choice(_string.digits)
     if "#" in character_classes:
         non_alphahumerical = r"~!@#$%^&*_-+=|\(){}[]:;<>,.?/"
         alphabet += non_alphahumerical
-        pwd += secrets.choice(non_alphahumerical)
-    random.shuffle(pwd)
-    pwd += [secrets.choice(alphabet) for x in range(length - len(pwd))]
+        pwd += _secrets.choice(non_alphahumerical)
+    _random.shuffle(pwd)
+    pwd += [_secrets.choice(alphabet) for x in range(length - len(pwd))]
     return "".join(pwd)

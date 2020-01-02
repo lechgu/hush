@@ -33,4 +33,3 @@ def decrypt(data, private_key_bytes, passphrase=None):
 
     cipher_aes = _AES.new(session_key, _AES.MODE_EAX, nonce)
     return cipher_aes.decrypt_and_verify(ciphertext, tag)
-
