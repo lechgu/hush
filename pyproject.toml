@@ -26,8 +26,8 @@ pytest = "^5.2"
 black = "^19.10b0"
 flake8 = "^3.7.9"
 pep8-naming = "^0.9.1"
-flake8-import-order = "^0.18.1"
 twine = "^3.1.1"
+flake8-isort = "^2.8.0"
 
 [tool.poetry.scripts]
 hush = 'hush:cli'

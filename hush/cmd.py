@@ -2,13 +2,10 @@ import base64
 import getpass
 import os
 
-
 import click
-
 from dotenv import load_dotenv
 
 from . import keypairs, passwords, secrets
-
 
 dotenv_file = os.path.join(os.getcwd(), ".env")
 if os.path.exists(dotenv_file):
