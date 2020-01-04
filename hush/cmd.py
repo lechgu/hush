@@ -13,7 +13,7 @@ if os.path.exists(dotenv_file):
 
 
 @click.group()
-@click.version_option(".5.2")
+@click.version_option(".5.3")
 def cli():
     """ cli to interact with hush"""
     pass
