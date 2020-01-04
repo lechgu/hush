@@ -1,3 +1,5 @@
 [flake8]
 exclude = .venv
 ignore = E203
+
+[isort]

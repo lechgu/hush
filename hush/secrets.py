@@ -1,4 +1,5 @@
-from Crypto.Cipher import AES as _AES, PKCS1_OAEP as _PKCS1_OAEP
+from Crypto.Cipher import AES as _AES
+from Crypto.Cipher import PKCS1_OAEP as _PKCS1_OAEP
 from Crypto.PublicKey import RSA as _RSA
 from Crypto.Random import get_random_bytes as _get_random_bytes
 

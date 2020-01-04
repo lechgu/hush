@@ -8,7 +8,7 @@ exclude = '''
 
 [tool.poetry]
 name = "hush"
-version = "0.5.2"
+version = "0.5.3"
 description = "Minimalistic command line secret management"
 license = "BSD-3-Clause"
 authors = ["Lech Gudalewicz <lechgu@gmail.com>"]
@@ -16,7 +16,7 @@ repository = "https://github.com/lechgu/hush"
 
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">= 3.7"
 click = "^7.0"
 python-dotenv = "^0.10.3"
 pycryptodome = "^3.9.4"
@@ -26,8 +26,8 @@ pytest = "^5.2"
 black = "^19.10b0"
 flake8 = "^3.7.9"
 pep8-naming = "^0.9.1"
-flake8-import-order = "^0.18.1"
 twine = "^3.1.1"
+flake8-isort = "^2.8.0"
 
 [tool.poetry.scripts]
 hush = 'hush:cli'

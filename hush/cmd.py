@@ -2,13 +2,10 @@ import base64
 import getpass
 import os
 
-
 import click
-
 from dotenv import load_dotenv
 
 from . import keypairs, passwords, secrets
-
 
 dotenv_file = os.path.join(os.getcwd(), ".env")
 if os.path.exists(dotenv_file):
@@ -16,7 +13,7 @@ if os.path.exists(dotenv_file):
 
 
 @click.group()
-@click.version_option(".5.2")
+@click.version_option(".5.3")
 def cli():
     """ cli to interact with hush"""
     pass
