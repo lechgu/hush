@@ -17,9 +17,9 @@ def encrypt(data, key):
     return enc_session_key + nonce + tag + ciphertext
 
 
-def decrypt(data, private_key_bytes, passphrase=None):
+def decrypt(data, key, passphrase=None):
 
-    private_key = _RSA.import_key(private_key_bytes, passphrase)
+    private_key = _RSA.import_key(key, passphrase)
     enc_session_key = data[: private_key.size_in_bytes()]
     nonce = data[
         private_key.size_in_bytes() : private_key.size_in_bytes() + 16
