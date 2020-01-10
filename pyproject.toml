@@ -32,6 +32,7 @@ flake8 = "^3.7.9"
 pep8-naming = "^0.9.1"
 twine = "^3.1.1"
 flake8-isort = "^2.8.0"
+bump2version = "^0.5.11"
 
 [tool.poetry.scripts]
 hush = 'hush:cli'
