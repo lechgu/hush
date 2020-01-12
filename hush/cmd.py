@@ -22,10 +22,9 @@ def configuration(config_file):
 def config_callback(ctx, param, value):
     section = ctx.command.name
     key = param.name
-    click.echo(f"{section}.{key}")
     if not value:
         with configuration(ctx.obj["config_file"]) as conf:
-            if param.type == int:
+            if param.type.name == "integer":
                 value = conf.getint(section, key)
             else:
                 value = conf.get(section, key)
@@ -112,8 +111,6 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     "-l",
     "--length",
     type=int,
-    default=16,
-    show_default=True,
     help="Password Length",
     callback=config_callback,
 )
