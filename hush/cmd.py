@@ -9,6 +9,14 @@ import click
 from . import keypairs, passwords, secrets
 
 
+class Context:
+    def __init__(self):
+        self.config_file = None
+
+
+pass_context = click.make_pass_decorator(Context, ensure=True)
+
+
 @contextlib.contextmanager
 def configuration(config_file):
     config = configparser.ConfigParser()
@@ -23,7 +31,7 @@ def config_callback(ctx, param, value):
     section = ctx.command.name
     key = param.name
     if not value:
-        with configuration(ctx.obj["config_file"]) as conf:
+        with configuration(ctx.obj.config_file) as conf:
             if param.type.name == "integer":
                 value = conf.getint(section, key)
             else:
@@ -42,11 +50,10 @@ def config_callback(ctx, param, value):
     default="~/.hush",
     help="Config file name, default '~/.hush' ",
 )
-@click.pass_context
+@pass_context
 def cli(ctx, config_file):
-    """ cli to interact with hush"""
-    ctx.ensure_object(dict)
-    ctx.obj["config_file"] = os.path.expanduser(config_file)
+    " cli to interact with hush"
+    ctx.config_file = os.path.expanduser(config_file)
 
 
 @cli.command(help="Encrypt a secret")
@@ -58,7 +65,7 @@ def cli(ctx, config_file):
     callback=config_callback,
 )
 @click.argument("file", type=click.File("rb"), required=True, default="-")
-@click.pass_context
+@pass_context
 def encrypt(ctx, public_key_file, file):
     data = file.read()
     with open(public_key_file) as f:
@@ -91,7 +98,7 @@ def encrypt(ctx, public_key_file, file):
     help="the private key passphrase",
 )
 @click.argument("file", type=click.File("rb"), required=True, default="-")
-@click.pass_context
+@pass_context
 def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     if ask_passphrase and passphrase:
         raise click.UsageError(
@@ -119,14 +126,9 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     "-c",
     type=str,
     callback=config_callback,
-    help="""Character classes, combination of the following: 
-    'a' (lowercase), 
-    'A' (upperase), 
-    '8' (digit), 
-    '#' (non-alphanumeric)
-    """,  # noqa
+    help="Character classes",
 )
-@click.pass_context
+@pass_context
 def generate(ctx, length, character_classes):
     if length < len(character_classes):
         raise click.UsageError("password too short")
@@ -262,15 +264,15 @@ def passphrase(
 )
 @click.option("-s", "--set", nargs=2, multiple=True, help="Set config value")
 @click.argument("val", required=False)
-@click.pass_context
+@pass_context
 def config(ctx, list, set, val):
     if list:
-        with configuration(ctx.obj["config_file"]) as config:
+        with configuration(ctx.config_file) as config:
             for section in config.sections():
                 for k, v in config.items(section):
                     click.echo(f"{section}.{k}={v}")
     if set:
-        with configuration(ctx.obj["config_file"]) as config:
+        with configuration(ctx.config_file) as config:
             for k, v in set:
                 parts = k.split(".")
                 if len(parts) != 2:
@@ -282,7 +284,7 @@ def config(ctx, list, set, val):
                 config[section][key] = v
 
     if val:
-        with configuration(ctx.obj["config_file"]) as config:
+        with configuration(ctx.config_file) as config:
             parts = val.split(".")
             if len(parts) != 2:
                 raise click.UsageError("Invalid config key")
