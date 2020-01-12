@@ -5,13 +5,8 @@ import getpass
 import os
 
 import click
-from dotenv import load_dotenv
 
 from . import keypairs, passwords, secrets
-
-dotenv_file = os.path.join(os.getcwd(), ".env")
-if os.path.exists(dotenv_file):
-    load_dotenv(dotenv_file)
 
 
 @contextlib.contextmanager
@@ -25,7 +20,17 @@ def configuration(config_file):
 
 
 def config_callback(ctx, param, value):
-
+    section = ctx.command.name
+    key = param.name
+    click.echo(f"{section}.{key}")
+    if not value:
+        with configuration(ctx.obj["config_file"]) as conf:
+            if param.type == int:
+                value = conf.getint(section, key)
+            else:
+                value = conf.get(section, key)
+    if not value:
+        value = param.default
     return value
 
 
@@ -51,7 +56,6 @@ def cli(ctx, config_file):
     "--public-key-file",
     type=click.File(),
     required=True,
-    envvar="HUSH_PUBLIC_KEY_FILE",
     help="The file containing the public key, for encryption",
     callback=config_callback,
 )
@@ -71,7 +75,6 @@ def encrypt(ctx, public_key_file, file):
     "--private-key-file",
     type=click.File(),
     required=True,
-    envvar="HUSH_PRIVATE_KEY_FILE",
     help="The file containing the private key, for decryption",
     callback=config_callback,
 )
@@ -110,7 +113,7 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     "--length",
     type=int,
     default=16,
-    envvar="HUSH_PASSWORD_LENGTH",
+    show_default=True,
     help="Password Length",
     callback=config_callback,
 )
@@ -118,9 +121,6 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     "--character-classes",
     "-c",
     type=str,
-    default="a",
-    required=True,
-    envvar="HUSH_CHARACTER_CLASSES",
     callback=config_callback,
     help="""Character classes, combination of the following: 
     'a' (lowercase), 
@@ -144,14 +144,16 @@ def generate(ctx, length, character_classes):
     "--name",
     type=str,
     default="rsa",
-    help="base file name for the keys, default: 'rsa",
+    show_default=True,
+    help="base file name for the keys",
 )
 @click.option(
     "-b",
     "--bits",
     type=click.Choice(["1024", "2048", "3072"]),
     default="2048",
-    help="key length size, in bits, default: 2048",
+    show_default=True,
+    help="key length size, in bits",
 )
 @click.option(
     "-S",
