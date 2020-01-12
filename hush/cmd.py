@@ -53,8 +53,7 @@ def cli(ctx, config_file):
 @click.option(
     "-p",
     "--public-key-file",
-    type=click.File(),
-    required=True,
+    type=str,
     help="The file containing the public key, for encryption",
     callback=config_callback,
 )
@@ -62,7 +61,8 @@ def cli(ctx, config_file):
 @click.pass_context
 def encrypt(ctx, public_key_file, file):
     data = file.read()
-    key = public_key_file.read()
+    with open(public_key_file) as f:
+        key = f.read()
     encrypted_data = secrets.encrypt(data, key)
 
     click.echo(base64.b64encode(encrypted_data))
@@ -72,8 +72,7 @@ def encrypt(ctx, public_key_file, file):
 @click.option(
     "-r",
     "--private-key-file",
-    type=click.File(),
-    required=True,
+    type=str,
     help="The file containing the private key, for decryption",
     callback=config_callback,
 )
@@ -102,7 +101,8 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     if ask_passphrase:
         secret = getpass.getpass("Enter the passphrase: ")
     data = base64.b64decode(file.read())
-    key = private_key_file.read()
+    with open(private_key_file) as f:
+        key = f.read()
     click.echo(secrets.decrypt(data, key, secret))
 
 
