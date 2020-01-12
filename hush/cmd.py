@@ -1,4 +1,5 @@
 import base64
+import configparser
 import contextlib
 import getpass
 import os
@@ -14,40 +15,34 @@ if os.path.exists(dotenv_file):
 
 
 @contextlib.contextmanager
-def configuration(config):
-    c = {}
-    config = os.path.expanduser(config)
-    if os.path.exists(config):
-        with open(config) as f:
-            for line in f.readlines():
-                vals = line.split("=")
-                if vals and len(vals) == 2:
-                    c[vals[0]] = c[vals[1]]
-    yield c
-    with open(config, "w") as f:
-        for k, v in c.items():
-            f.write(f"{k}={v}")
+def configuration(config_file):
+    config = configparser.ConfigParser()
+    if os.path.exists(config_file):
+        config.read(config_file)
+    yield config
+    with open(config_file, "w") as f:
+        config.write(f)
 
 
 def config_callback(ctx, param, value):
-    with configuration(ctx.obj["config"]) as c:
-        pass
+
     return value
 
 
 @click.group()
 @click.version_option("2020.1.11")
 @click.option(
-    "--config",
+    "-c",
+    "--config-file",
     type=str,
     default="~/.hush",
     help="Config file name, default '~/.hush' ",
 )
 @click.pass_context
-def cli(ctx, config):
+def cli(ctx, config_file):
     """ cli to interact with hush"""
     ctx.ensure_object(dict)
-    ctx.obj["config"] = config
+    ctx.obj["config_file"] = os.path.expanduser(config_file)
 
 
 @cli.command(help="Encrypt a secret")
@@ -145,14 +140,18 @@ def generate(ctx, length, character_classes):
 
 @cli.command(help="Generate RSA private/public key pair")
 @click.option(
-    "-n", "--name", type=str, default="rsa", help="base file name for keys"
+    "-n",
+    "--name",
+    type=str,
+    default="rsa",
+    help="base file name for the keys, default: 'rsa",
 )
 @click.option(
     "-b",
     "--bits",
     type=click.Choice(["1024", "2048", "3072"]),
     default="2048",
-    help="key length size, in bits, by default 2048",
+    help="key length size, in bits, default: 2048",
 )
 @click.option(
     "-S",
@@ -252,3 +251,42 @@ def passphrase(
 
     with open(private_key_file, "wb") as f:
         f.write(new_key)
+
+
+@cli.command(help="Get configuration value")
+@click.option(
+    "-l",
+    "--list",
+    is_flag=True,
+    default=False,
+    help="List all configuration variables",
+)
+@click.option("-s", "--set", nargs=2, multiple=True, help="Set config value")
+@click.argument("val", required=False)
+@click.pass_context
+def config(ctx, list, set, val):
+    if list:
+        with configuration(ctx.obj["config_file"]) as config:
+            for section in config.sections():
+                for k, v in config.items(section):
+                    click.echo(f"{section}.{k}={v}")
+    if set:
+        with configuration(ctx.obj["config_file"]) as config:
+            for k, v in set:
+                parts = k.split(".")
+                if len(parts) != 2:
+                    raise click.UsageError("Invalid config key")
+                section = parts[0]
+                key = parts[1]
+                if section not in config.sections():
+                    config.add_section(section)
+                config[section][key] = v
+
+    if val:
+        with configuration(ctx.obj["config_file"]) as config:
+            parts = val.split(".")
+            if len(parts) != 2:
+                raise click.UsageError("Invalid config key")
+            section = parts[0]
+            key = parts[1]
+            click.echo(config.get(section, key))
