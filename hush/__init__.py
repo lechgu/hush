@@ -1,1 +1,1 @@
-from .cmd import cli  # noqa
+from .console import cli  # noqa

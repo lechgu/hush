@@ -38,6 +38,11 @@ def config_callback(ctx, param, value):
                 value = conf.get(section, key)
     if not value:
         value = param.default
+    if not value:
+        raise click.UsageError(
+            f"{section}.{key} is missing. "
+            f"Either set it in the config or pass as an option"
+        )
     return value
 
 
