@@ -1,4 +1,5 @@
 import base64
+import contextlib
 import getpass
 import os
 
@@ -12,11 +13,41 @@ if os.path.exists(dotenv_file):
     load_dotenv(dotenv_file)
 
 
+@contextlib.contextmanager
+def configuration(config):
+    c = {}
+    config = os.path.expanduser(config)
+    if os.path.exists(config):
+        with open(config) as f:
+            for line in f.readlines():
+                vals = line.split("=")
+                if vals and len(vals) == 2:
+                    c[vals[0]] = c[vals[1]]
+    yield c
+    with open(config, "w") as f:
+        for k, v in c.items():
+            f.write(f"{k}={v}")
+
+
+def config_callback(ctx, param, value):
+    with configuration(ctx.obj["config"]) as c:
+        pass
+    return value
+
+
 @click.group()
 @click.version_option("2020.1.11")
-def cli():
+@click.option(
+    "--config",
+    type=str,
+    default="~/.hush",
+    help="Config file name, default '~/.hush' ",
+)
+@click.pass_context
+def cli(ctx, config):
     """ cli to interact with hush"""
-    pass
+    ctx.ensure_object(dict)
+    ctx.obj["config"] = config
 
 
 @cli.command(help="Encrypt a secret")
@@ -27,9 +58,11 @@ def cli():
     required=True,
     envvar="HUSH_PUBLIC_KEY_FILE",
     help="The file containing the public key, for encryption",
+    callback=config_callback,
 )
 @click.argument("file", type=click.File("rb"), required=True, default="-")
-def encrypt(public_key_file, file):
+@click.pass_context
+def encrypt(ctx, public_key_file, file):
     data = file.read()
     key = public_key_file.read()
     encrypted_data = secrets.encrypt(data, key)
@@ -45,6 +78,7 @@ def encrypt(public_key_file, file):
     required=True,
     envvar="HUSH_PRIVATE_KEY_FILE",
     help="The file containing the private key, for decryption",
+    callback=config_callback,
 )
 @click.option(
     "-S",
@@ -61,7 +95,8 @@ def encrypt(public_key_file, file):
     help="the private key passphrase",
 )
 @click.argument("file", type=click.File("rb"), required=True, default="-")
-def decrypt(private_key_file, ask_passphrase, passphrase, file):
+@click.pass_context
+def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     if ask_passphrase and passphrase:
         raise click.UsageError(
             "only one of the 'passphrase' and 'ask-passphrase' can be set "
@@ -75,7 +110,15 @@ def decrypt(private_key_file, ask_passphrase, passphrase, file):
 
 
 @cli.command(help="Generate random password")
-@click.option("-l", "--length", type=int, default=16, help="Password Length")
+@click.option(
+    "-l",
+    "--length",
+    type=int,
+    default=16,
+    envvar="HUSH_PASSWORD_LENGTH",
+    help="Password Length",
+    callback=config_callback,
+)
 @click.option(
     "--character-classes",
     "-c",
@@ -83,6 +126,7 @@ def decrypt(private_key_file, ask_passphrase, passphrase, file):
     default="a",
     required=True,
     envvar="HUSH_CHARACTER_CLASSES",
+    callback=config_callback,
     help="""Character classes, combination of the following: 
     'a' (lowercase), 
     'A' (upperase), 
@@ -90,7 +134,8 @@ def decrypt(private_key_file, ask_passphrase, passphrase, file):
     '#' (non-alphanumeric)
     """,  # noqa
 )
-def generate(length, character_classes):
+@click.pass_context
+def generate(ctx, length, character_classes):
     if length < len(character_classes):
         raise click.UsageError("password too short")
 
