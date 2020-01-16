@@ -13,9 +13,9 @@ include_trailing_comma = true
 [pycalver]
 current_version = "v202001.0001"
 version_pattern = "{pycalver}"
-commit = true
-tag = true
-push = true
+commit = false
+tag = false
+push = false
 
 [pycalver.file_patterns]
 "pyproject.toml" = [
@@ -30,7 +30,7 @@ push = true
 
 [tool.poetry]
 name = "hush"
-version = "202001.1"
+version = "202001.2"
 description = "Minimalistic command line secret management"
 license = "BSD-3-Clause"
 authors = ["Lech Gudalewicz <lechgu@gmail.com>"]
