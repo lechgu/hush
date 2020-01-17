@@ -16,7 +16,7 @@ def generate(length, character_classes):
         alphabet += _string.digits
         pwd += _secrets.choice(_string.digits)
     if "#" in character_classes:
-        non_alphahumerical = r"~!@#$%^&*_-+=|\(){}[]:;<>,.?/"
+        non_alphahumerical = r"~!@#$%^&*_-+=|(){}[]:;<>,.?/"
         alphabet += non_alphahumerical
         pwd += _secrets.choice(non_alphahumerical)
     _random.shuffle(pwd)
