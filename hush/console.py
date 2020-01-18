@@ -8,8 +8,8 @@ import click
 
 from . import keypairs, passwords, secrets
 
-DEFAULT_CONFIG_FILE_NAME = "~/.hush"
-DEFAULT_PASSWORD_LENGTH = 16
+DEFAULT_CONFIG_FILE = "~/.hush"
+DEFAULT_PASSWORD_LENGTH = 8
 DEFAULT_CHARACTER_CLASSES = "aA8#"
 
 
@@ -70,7 +70,7 @@ def config_callback(ctx, param, value):
     "--config-file",
     type=str,
     default="~/.hush",
-    help=f"Config file name [default: {DEFAULT_CONFIG_FILE_NAME}] ",
+    help=f"Config file name [default: {DEFAULT_CONFIG_FILE}] ",
 )
 @pass_context
 def cli(ctx, config_file):
@@ -313,3 +313,38 @@ def config(ctx, list, set, val):
             section = parts[0]
             key = parts[1]
             click.echo(config.get(section, key))
+
+
+@cli.command(help="Init the configuration")
+@pass_context
+@click.option(
+    "-r",
+    "--private-key-file",
+    type=str,
+    required=True,
+    help="Private key file",
+)
+@click.option(
+    "-p", "--public-key-file", type=str, required=True, help="Public key file",
+)
+@click.option(
+    "--yes", type=bool, help="Overwrite the existing config file if exists.",
+)
+def init(ctx, private_key_file, public_key_file, yes):
+    if not yes and os.path.exists(ctx.config_file):
+        yn = click.prompt(f"{ctx.config_file} exists, overwrite? [y/n]")
+        yes = yn.strip() and yn[0].lower() == "y"
+    if yes:
+        with configuration(ctx.config_file) as config:
+            values = [
+                ('generate', 'length', str(DEFAULT_PASSWORD_LENGTH)),
+                ('generate', 'character_clsses', DEFAULT_CHARACTER_CLASSES),
+                ('decrypt', 'private_key_file', private_key_file),
+                ('encrypt', 'public_key_file', public_key_file),
+            ]
+            for (section, key, v) in values:
+                if section not in config.sections():
+                    config.add_section(section)
+                config[section][key] = v
+
+    pass
