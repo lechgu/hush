@@ -234,14 +234,13 @@ def test_alterantive_config():
     [generate]
     length = 40
     character_classes = a
-    
     [decrypt]
-    private_key_file = /Users/Lech/.ssh/lechgu_gmail_com_rsa
+    private_key_file = foo.pri
 
     [encrypt]
-    public_key_file = /Users/Lech/.ssh/lechgu_gmail_com_rsa.pub
+    public_key_file = foo.pub
     """
-    with keypair():
+    with keypair("foo"):
         with config_file(lines) as alternative_config:
             runner = CliRunner()
             result = runner.invoke(cli, ["-c", alternative_config, "generate"])
@@ -249,4 +248,11 @@ def test_alterantive_config():
             output = result.output.strip()
             assert len(output) == 40
             assert all([x in string.ascii_lowercase for x in output])
-
+            result = runner.invoke(
+                cli, ["encrypt", "-p", "foo.pub"], input="secret"
+            )
+        assert result.exit_code == 0
+        output = result.output
+        result = runner.invoke(cli, ["decrypt", "-r", "foo.pri"], input=output)
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"
