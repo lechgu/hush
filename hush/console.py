@@ -8,6 +8,10 @@ import click
 
 from . import keypairs, passwords, secrets
 
+DEFAULT_CONFIG_FILE_NAME = "~/.hush"
+DEFAULT_PASSWORD_LENGTH = 16
+DEFAULT_CHARACTER_CLASSES = "aA8#"
+
 
 class Context:
     def __init__(self):
@@ -28,9 +32,14 @@ def configuration(config_file):
 
 
 def config_callback(ctx, param, value):
+    null_config = {
+        "generate.length": DEFAULT_PASSWORD_LENGTH,
+        "generate.character_classes": DEFAULT_CHARACTER_CLASSES,
+    }
     section = ctx.command.name
     key = param.name
-    if not value and not param.default:
+    config_key = f"{section}.{key}"
+    if not value:
         with configuration(ctx.obj.config_file) as conf:
             if param.type.name == "integer":
                 value = (
@@ -45,10 +54,10 @@ def config_callback(ctx, param, value):
                     else None
                 )
     if not value:
-        value = param.default
+        value = null_config.get(config_key, None)
     if not value:
         raise click.UsageError(
-            f"{section}.{key} is missing. "
+            f"{config_key} is missing. "
             f"Either set it in the config or supply as an option"
         )
     return value
@@ -61,7 +70,7 @@ def config_callback(ctx, param, value):
     "--config-file",
     type=str,
     default="~/.hush",
-    help="Config file name, default '~/.hush' ",
+    help=f"Config file name [default: {DEFAULT_CONFIG_FILE_NAME}] ",
 )
 @pass_context
 def cli(ctx, config_file):
@@ -131,19 +140,15 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     "-l",
     "--length",
     type=int,
-    default=16,
-    show_default=True,
-    help="Password Length",
+    help=f"Password Length [default: {DEFAULT_PASSWORD_LENGTH}]",
     callback=config_callback,
 )
 @click.option(
     "--character-classes",
     "-c",
     type=str,
-    default="aA8#",
-    show_default=True,
     callback=config_callback,
-    help="Character classes",
+    help=f"Character classes [default: {DEFAULT_CHARACTER_CLASSES}]",
 )
 @pass_context
 def generate(ctx, length, character_classes):
