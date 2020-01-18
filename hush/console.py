@@ -9,7 +9,7 @@ import click
 from . import keypairs, passwords, secrets
 
 DEFAULT_CONFIG_FILE = "~/.hush"
-DEFAULT_PASSWORD_LENGTH = 8
+DEFAULT_PASSWORD_LENGTH = 16
 DEFAULT_CHARACTER_CLASSES = "aA8#"
 
 
@@ -64,7 +64,7 @@ def config_callback(ctx, param, value):
 
 
 @click.group()
-@click.version_option("202001.2")
+@click.version_option("202001.3")
 @click.option(
     "-c",
     "--config-file",

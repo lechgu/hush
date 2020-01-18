@@ -36,7 +36,7 @@ def test_version():
     runner = CliRunner()
     output = runner.invoke(cli, "--version").output.strip()
 
-    assert "202001.2" in output
+    assert "202001.3" in output
 
 
 def test_generate_default():
@@ -78,7 +78,9 @@ def test_generate_nonalphanumeric():
     assert result.exit_code == 0
     output = result.output.strip()
     nonalphanumeric = r"~!@#$%^&*_-+=|\(){}[]:;<>,.?/"
-    assert len(output) == 8
+
+    assert len(output) == DEFAULT_PASSWORD_LENGTH
+
     assert all([x in nonalphanumeric for x in output])
 
 
