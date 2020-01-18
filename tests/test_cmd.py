@@ -1,10 +1,12 @@
 import os
 import string
 from contextlib import contextmanager
+from tempfile import mktemp
 
 from click.testing import CliRunner
 
 from hush import cli
+from hush.console import DEFAULT_PASSWORD_LENGTH
 
 
 @contextmanager
@@ -21,17 +23,26 @@ def keypair(name="rsa", passphrase=None):
     os.remove(f"{name}.pri")
 
 
+@contextmanager
+def config_file(lines):
+    file_name = mktemp()
+    with open(file_name, "w") as f:
+        f.writelines(lines)
+    yield file_name
+    os.remove(file_name)
+
+
 def test_version():
     runner = CliRunner()
     output = runner.invoke(cli, "--version").output.strip()
 
-    assert "202001.1" in output
+    assert "202001.2" in output
 
 
 def test_generate_default():
     runner = CliRunner()
     output = runner.invoke(cli, "generate").output.strip()
-    assert len(output) == 16
+    assert len(output) == DEFAULT_PASSWORD_LENGTH
 
 
 def test_generate_lowercase():
@@ -39,7 +50,7 @@ def test_generate_lowercase():
     result = runner.invoke(cli, ["generate", "-c", "a"])
     assert result.exit_code == 0
     output = result.output.strip()
-    assert len(output) == 16
+    assert len(output) == DEFAULT_PASSWORD_LENGTH
     assert all([x in string.ascii_lowercase for x in output])
 
 
@@ -48,7 +59,7 @@ def test_generate_uppercase():
     result = runner.invoke(cli, ["generate", "-c", "A"])
     assert result.exit_code == 0
     output = result.output.strip()
-    assert len(output) == 16
+    assert len(output) == DEFAULT_PASSWORD_LENGTH
     assert all([x in string.ascii_uppercase for x in output])
 
 
@@ -57,7 +68,7 @@ def test_generate_digits():
     result = runner.invoke(cli, ["generate", "-c", "8"])
     assert result.exit_code == 0
     output = result.output.strip()
-    assert len(output) == 16
+    assert len(output) == DEFAULT_PASSWORD_LENGTH
     assert all([x in string.digits for x in output])
 
 
@@ -67,7 +78,7 @@ def test_generate_nonalphanumeric():
     assert result.exit_code == 0
     output = result.output.strip()
     nonalphanumeric = r"~!@#$%^&*_-+=|\(){}[]:;<>,.?/"
-    assert len(output) == 16
+    assert len(output) == 8
     assert all([x in nonalphanumeric for x in output])
 
 
@@ -214,5 +225,34 @@ def test_change_passphrase_empty():
         result = runner.invoke(cli, ["passphrase", "-r", "rsa.pri", "--yes"],)
         assert result.exit_code == 0
         result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"
+
+
+def test_alterantive_config():
+    lines = """
+    [generate]
+    length = 40
+    character_classes = a
+    [decrypt]
+    private_key_file = foo.pri
+
+    [encrypt]
+    public_key_file = foo.pub
+    """
+    with keypair("foo"):
+        with config_file(lines) as alternative_config:
+            runner = CliRunner()
+            result = runner.invoke(cli, ["-c", alternative_config, "generate"])
+            assert result.exit_code == 0
+            output = result.output.strip()
+            assert len(output) == 40
+            assert all([x in string.ascii_lowercase for x in output])
+            result = runner.invoke(
+                cli, ["encrypt", "-p", "foo.pub"], input="secret"
+            )
+        assert result.exit_code == 0
+        output = result.output
+        result = runner.invoke(cli, ["decrypt", "-r", "foo.pri"], input=output)
         assert result.exit_code == 0
         assert result.output.strip() == "secret"

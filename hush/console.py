@@ -8,6 +8,10 @@ import click
 
 from . import keypairs, passwords, secrets
 
+DEFAULT_CONFIG_FILE = "~/.hush"
+DEFAULT_PASSWORD_LENGTH = 8
+DEFAULT_CHARACTER_CLASSES = "aA8#"
+
 
 class Context:
     def __init__(self):
@@ -28,32 +32,45 @@ def configuration(config_file):
 
 
 def config_callback(ctx, param, value):
+    null_config = {
+        "generate.length": DEFAULT_PASSWORD_LENGTH,
+        "generate.character_classes": DEFAULT_CHARACTER_CLASSES,
+    }
     section = ctx.command.name
     key = param.name
+    config_key = f"{section}.{key}"
     if not value:
         with configuration(ctx.obj.config_file) as conf:
             if param.type.name == "integer":
-                value = conf.getint(section, key)
+                value = (
+                    conf.getint(section, key)
+                    if conf.has_option(section, key)
+                    else None
+                )
             else:
-                value = conf.get(section, key)
+                value = (
+                    conf.get(section, key)
+                    if conf.has_option(section, key)
+                    else None
+                )
     if not value:
-        value = param.default
+        value = null_config.get(config_key, None)
     if not value:
         raise click.UsageError(
-            f"{section}.{key} is missing. "
-            f"Either set it in the config or pass as an option"
+            f"{config_key} is missing. "
+            f"Either set it in the config or supply as an option"
         )
     return value
 
 
 @click.group()
-@click.version_option("202001.1")
+@click.version_option("202001.2")
 @click.option(
     "-c",
     "--config-file",
     type=str,
     default="~/.hush",
-    help="Config file name, default '~/.hush' ",
+    help=f"Config file name [default: {DEFAULT_CONFIG_FILE}] ",
 )
 @pass_context
 def cli(ctx, config_file):
@@ -123,7 +140,7 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     "-l",
     "--length",
     type=int,
-    help="Password Length",
+    help=f"Password Length [default: {DEFAULT_PASSWORD_LENGTH}]",
     callback=config_callback,
 )
 @click.option(
@@ -131,7 +148,7 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     "-c",
     type=str,
     callback=config_callback,
-    help="Character classes",
+    help=f"Character classes [default: {DEFAULT_CHARACTER_CLASSES}]",
 )
 @pass_context
 def generate(ctx, length, character_classes):
@@ -296,3 +313,38 @@ def config(ctx, list, set, val):
             section = parts[0]
             key = parts[1]
             click.echo(config.get(section, key))
+
+
+@cli.command(help="Init the configuration")
+@pass_context
+@click.option(
+    "-r",
+    "--private-key-file",
+    type=str,
+    required=True,
+    help="Private key file",
+)
+@click.option(
+    "-p", "--public-key-file", type=str, required=True, help="Public key file",
+)
+@click.option(
+    "--yes", type=bool, help="Overwrite the existing config file if exists.",
+)
+def init(ctx, private_key_file, public_key_file, yes):
+    if not yes and os.path.exists(ctx.config_file):
+        yn = click.prompt(f"{ctx.config_file} exists, overwrite? [y/n]")
+        yes = yn.strip() and yn[0].lower() == "y"
+    if yes:
+        with configuration(ctx.config_file) as config:
+            values = [
+                ('generate', 'length', str(DEFAULT_PASSWORD_LENGTH)),
+                ('generate', 'character_clsses', DEFAULT_CHARACTER_CLASSES),
+                ('decrypt', 'private_key_file', private_key_file),
+                ('encrypt', 'public_key_file', public_key_file),
+            ]
+            for (section, key, v) in values:
+                if section not in config.sections():
+                    config.add_section(section)
+                config[section][key] = v
+
+    pass

@@ -8,6 +8,10 @@ Hush does not require a master password as other password managers do, instead i
 
 #### What's new?
 
+- Version 202001.2 (Jan 17, 2020)
+
+  - Added command to initialize the default config
+
 - Version 202001.1 (Jan 16, 2020)
 
   - Python 3.8 compatibility
@@ -62,8 +66,4 @@ push decrypt password.txt | clip
 
 ### configuration
 
-hush requires to know where to find the private and public key files, these locations can be provided either as parameters or set as environment variables. For more options, run
-
-```
-hush --help
-```
+You can pass the options through the command line parameters or use the configuration. `hush init` creates the default configuration, you will still need to provide the private and public RSA keys though. If you don't have them, you can run `hush keygen` to generate a pair.
