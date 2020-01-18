@@ -30,18 +30,26 @@ def configuration(config_file):
 def config_callback(ctx, param, value):
     section = ctx.command.name
     key = param.name
-    if not value:
+    if not value and not param.default:
         with configuration(ctx.obj.config_file) as conf:
             if param.type.name == "integer":
-                value = conf.getint(section, key)
+                value = (
+                    conf.getint(section, key)
+                    if conf.has_option(section, key)
+                    else None
+                )
             else:
-                value = conf.get(section, key)
+                value = (
+                    conf.get(section, key)
+                    if conf.has_option(section, key)
+                    else None
+                )
     if not value:
         value = param.default
     if not value:
         raise click.UsageError(
             f"{section}.{key} is missing. "
-            f"Either set it in the config or pass as an option"
+            f"Either set it in the config or supply as an option"
         )
     return value
 
@@ -123,6 +131,8 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     "-l",
     "--length",
     type=int,
+    default=16,
+    show_default=True,
     help="Password Length",
     callback=config_callback,
 )
@@ -130,6 +140,8 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     "--character-classes",
     "-c",
     type=str,
+    default="aA8#",
+    show_default=True,
     callback=config_callback,
     help="Character classes",
 )
