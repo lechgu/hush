@@ -9,7 +9,11 @@ import click
 from . import keypairs, passwords, secrets
 
 DEFAULT_CONFIG_FILE = "~/.hush"
+<<<<<<< HEAD
 DEFAULT_PASSWORD_LENGTH = 16
+=======
+DEFAULT_PASSWORD_LENGTH = 8
+>>>>>>> master
 DEFAULT_CHARACTER_CLASSES = "aA8#"
 
 
