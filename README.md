@@ -8,21 +8,9 @@ Hush does not require a master password as other password managers do, instead i
 
 #### What's new?
 
-- Version 202001.2 (Jan 17, 2020)
+- Version 202001.3 (Jan 18, 2020)
 
-  - Added command to initialize the default config
-
-- Version 202001.1 (Jan 16, 2020)
-
-  - Python 3.8 compatibility
-
-- Version 0.5.2 (Jan 1, 2020)
-
-  - repackage to allow cli-less usage
-
-- Version 0.5.1 (Dec 31, 2019)
-  - support for generating RSA key pair
-  - support for the private key passphrase, for extra security
+  - Initial stable release
 
 ### installation
 
