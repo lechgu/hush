@@ -8,6 +8,10 @@ Hush does not require a master password as other password managers do, instead i
 
 #### What's new?
 
+- Version 202001.4 (Jan 23, 2020)
+
+  - Improved compatibility with ssh RSA keys
+
 - Version 202001.3 (Jan 18, 2020)
 
   - Initial stable release
