@@ -10,6 +10,9 @@ def generate(bits, passphrase):
 
 def change_passphrase(key, old_passphrase, new_passphrase):
     key = _RSA.importKey(key, old_passphrase)
-    return key.export_key(
-        passphrase=new_passphrase, pkcs=8, protection="scryptAndAES128-CBC"
-    )
+    if new_passphrase:
+        return key.export_key(
+            passphrase=new_passphrase, pkcs=8, protection="scryptAndAES128-CBC"
+        )
+    else:
+        return key.exportKey()
