@@ -4,7 +4,7 @@ from Crypto.PublicKey import RSA as _RSA
 from Crypto.Random import get_random_bytes as _get_random_bytes
 
 
-def encrypt(data, key, mode="eax"):
+def encrypt(data, key, mode):
     aes_mode = _AES.MODE_GCM if mode == "gcm" else _AES.MODE_EAX
     session_key = _get_random_bytes(16)
     cipher_aes = _AES.new(session_key, aes_mode)
