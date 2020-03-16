@@ -14,21 +14,25 @@ def dump(arr):
 
 
 def decrypt(data, key):
-    print(f"{len(data)} {len(key)}")
+
     private_key = _RSA.import_key(key)
     priv_key_len = private_key.size_in_bytes()
-    print(priv_key_len)
+
     enc_session_key = data[:priv_key_len]
-    print(len(enc_session_key))
     nonce = data[priv_key_len : priv_key_len + 16]
-    print(dump(nonce))
+
     tag = data[priv_key_len + 16 : priv_key_len + 32]
-    print(dump(tag))
     ciphertext = data[priv_key_len + 32 :]
-    print(dump(ciphertext))
 
     cipher_rsa = _PKCS1_OAEP.new(private_key)
     session_key = cipher_rsa.decrypt(enc_session_key)
+    print(f"session key: {dump(session_key)}")
+    print(f"ciphertext: {dump(ciphertext)}")
+    print(f"nonce: {dump(nonce)}")
+    print(f"tag: {dump(tag)}")
+    cipher_aes = _AES.new(session_key, _AES.MODE_EAX, nonce)
+    plain_text = cipher_aes.decrypt_and_verify(ciphertext, tag)
+    print(plain_text)
 
 
 def main():
