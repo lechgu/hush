@@ -18,7 +18,7 @@ def encrypt(data, key, mode):
     return enc_session_key + nonce + tag + ciphertext
 
 
-def decrypt(data, key, mode="eax", passphrase=None):
+def decrypt(data, key, mode, passphrase=None):
     aes_mode = _AES.MODE_GCM if mode == "gcm" else _AES.MODE_EAX
     private_key = _RSA.import_key(key, passphrase)
     enc_session_key = data[: private_key.size_in_bytes()]

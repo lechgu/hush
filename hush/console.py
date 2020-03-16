@@ -90,8 +90,6 @@ def cli(ctx, config_file):
     "-m",
     "--mode",
     type=click.Choice(["eax", "gcm"]),
-    default="eax",
-    show_default=True,
     help="AES encryption mode",
 )
 @click.argument("file", type=click.File("rb"), required=True, default="-")
@@ -131,8 +129,6 @@ def encrypt(ctx, public_key_file, mode, file):
     "-m",
     "--mode",
     type=click.Choice(["eax", "gcm"]),
-    default="eax",
-    show_default=True,
     help="AES encryption mode",
 )
 @click.argument("file", type=click.File("rb"), required=True, default="-")
