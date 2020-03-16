@@ -36,7 +36,7 @@ def test_version():
     runner = CliRunner()
     output = runner.invoke(cli, "--version").output.strip()
 
-    assert "202001.4" in output
+    assert "202003.4" in output
 
 
 def test_generate_default():

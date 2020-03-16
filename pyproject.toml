@@ -30,7 +30,7 @@ push = false
 
 [tool.poetry]
 name = "hush"
-version = "202001.4"
+version = "202003.4"
 description = "Minimalistic command line secret management"
 license = "BSD-3-Clause"
 authors = ["Lech Gudalewicz <lechgu@gmail.com>"]
