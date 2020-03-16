@@ -111,7 +111,9 @@ def test_encrypt_decrypt():
         )
         assert result.exit_code == 0
         output = result.output
-        result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-m", "eax"], input=output
+        )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
 
@@ -139,7 +141,9 @@ def test_keygen_name():
         )
         assert result.exit_code == 0
         output = result.output
-        result = runner.invoke(cli, ["decrypt", "-r", "foo.pri"], input=output)
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "foo.pri", "-m", "eax"], input=output
+        )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
 
@@ -153,7 +157,9 @@ def test_keygen_passphrase():
         assert result.exit_code == 0
         output = result.output
         result = runner.invoke(
-            cli, ["decrypt", "-r", "rsa.pri", "-s", "bar"], input=output
+            cli,
+            ["decrypt", "-r", "rsa.pri", "-s", "bar", "-m", "eax"],
+            input=output,
         )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
@@ -167,15 +173,19 @@ def test_add_passphrase():
         )
         assert result.exit_code == 0
         output = result.output
-        result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-m", "eax"], input=output
+        )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
         result = runner.invoke(
-            cli, ["passphrase", "-r", "rsa.pri", "-s", "boo", "--yes"]
+            cli, ["passphrase", "-r", "rsa.pri", "-s", "boo", "--yes"],
         )
         assert result.exit_code == 0
         result = runner.invoke(
-            cli, ["decrypt", "-r", "rsa.pri", "-s", "boo"], input=output
+            cli,
+            ["decrypt", "-r", "rsa.pri", "-s", "boo", "-m", "eax"],
+            input=output,
         )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
@@ -190,7 +200,9 @@ def test_strip_passphrase():
         assert result.exit_code == 0
         output = result.output
         result = runner.invoke(
-            cli, ["decrypt", "-r", "rsa.pri", "-s", "bar"], input=output
+            cli,
+            ["decrypt", "-r", "rsa.pri", "-s", "bar", "-m", "eax"],
+            input=output,
         )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
@@ -198,7 +210,9 @@ def test_strip_passphrase():
             cli, ["passphrase", "-r", "rsa.pri", "--yes", "-o", "bar"]
         )
         assert result.exit_code == 0
-        result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-m", "eax"], input=output
+        )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
 
@@ -212,7 +226,9 @@ def test_change_passphrase():
         assert result.exit_code == 0
         output = result.output
         result = runner.invoke(
-            cli, ["decrypt", "-r", "rsa.pri", "-s", "foo"], input=output
+            cli,
+            ["decrypt", "-r", "rsa.pri", "-s", "foo", "-m", "eax"],
+            input=output,
         )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
@@ -222,7 +238,19 @@ def test_change_passphrase():
         )
         assert result.exit_code == 0
         result = runner.invoke(
-            cli, ["decrypt", "-r", "rsa.pri", "-s", "bar"], input=output
+            cli,
+            [
+                "decrypt",
+                "-r",
+                "rsa.pri",
+                "-s",
+                "bar",
+                "-m",
+                "eax",
+                "-m",
+                "eax",
+            ],
+            input=output,
         )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
@@ -236,12 +264,16 @@ def test_change_passphrase_empty():
         )
         assert result.exit_code == 0
         output = result.output
-        result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-m", "eax"], input=output
+        )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
         result = runner.invoke(cli, ["passphrase", "-r", "rsa.pri", "--yes"],)
         assert result.exit_code == 0
-        result = runner.invoke(cli, ["decrypt", "-r", "rsa.pri"], input=output)
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-m", "eax"], input=output
+        )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
 
@@ -270,6 +302,8 @@ def test_alterantive_config():
             )
         assert result.exit_code == 0
         output = result.output
-        result = runner.invoke(cli, ["decrypt", "-r", "foo.pri"], input=output)
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "foo.pri", "-m", "eax"], input=output
+        )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
