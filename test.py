@@ -10,7 +10,7 @@ private_key_file = "/Users/Lech/.ssh/lechgu_gmail_com_rsa"
 
 
 def dump(arr):
-    return "".join([str(hex(x)[2:]) for x in arr])
+    return "".join([f"{x:02x}" for x in arr])
 
 
 def decrypt(data, key):
@@ -26,11 +26,9 @@ def decrypt(data, key):
     print(dump(tag))
     ciphertext = data[priv_key_len + 32 :]
     print(dump(ciphertext))
-    # cipher_rsa = _PKCS1_OAEP.new(private_key)
-    # session_key = cipher_rsa.decrypt(enc_session_key)
-    # cipher_aes = _AES.new(session_key, _AES.MODE_EAX, nonce)
-    # plaintext = cipher_aes.decrypt_and_verify(ciphertext, tag)
-    # print(plaintext)
+
+    cipher_rsa = _PKCS1_OAEP.new(private_key)
+    session_key = cipher_rsa.decrypt(enc_session_key)
 
 
 def main():
