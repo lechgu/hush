@@ -1,9 +1,8 @@
 import base64
 
-from Crypto.PublicKey import RSA as _RSA
-from Crypto.Cipher import PKCS1_OAEP as _PKCS1_OAEP
 from Crypto.Cipher import AES as _AES
-
+from Crypto.Cipher import PKCS1_OAEP as _PKCS1_OAEP
+from Crypto.PublicKey import RSA as _RSA
 
 secret_file = "/Users/Lech/.keys/ssn/lech"
 private_key_file = "/Users/Lech/.ssh/lechgu_gmail_com_rsa"
