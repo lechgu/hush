@@ -3,10 +3,14 @@
 ####
 
 hush is a minimalistic command line password manager.
-It was developed to satisfy the need to manage passwords and other secrets so they can be stored securely in the text format, compatible with git and onther version control. systems.
-Hush does not require a master password as other password managers do, instead it uses RSA public/private key pair to encrypt and decrypt passwords. These are exactly same keys used for ssh connectons to the github and similar.
+It was developed to satisfy the need to manage passwords and other secrets so they can be stored securely in the text format, compatible with git and other version control. systems.
+Hush does not require a master password as other password managers do, instead it uses RSA public/private key pair to encrypt and decrypt passwords. These are exactly same keys used for ssh connections to the github and similar.
 
 #### What's new?
+
+- Version 202003.4 (Mar 6, 2020)
+
+  - introduced GCM mode for the AES encryption. Choose between GCM and EAX. For the secrets encrypted with the previous version explicitly pass `--mode eax` to decrypt.
 
 - Version 202001.4 (Jan 23, 2020)
 

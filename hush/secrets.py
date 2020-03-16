@@ -4,9 +4,10 @@ from Crypto.PublicKey import RSA as _RSA
 from Crypto.Random import get_random_bytes as _get_random_bytes
 
 
-def encrypt(data, key):
+def encrypt(data, key, mode):
+    aes_mode = _AES.MODE_GCM if mode == "gcm" else _AES.MODE_EAX
     session_key = _get_random_bytes(16)
-    cipher_aes = _AES.new(session_key, _AES.MODE_EAX)
+    cipher_aes = _AES.new(session_key, aes_mode)
     nonce = cipher_aes.nonce
 
     public_key = _RSA.import_key(key)
@@ -17,8 +18,8 @@ def encrypt(data, key):
     return enc_session_key + nonce + tag + ciphertext
 
 
-def decrypt(data, key, passphrase=None):
-
+def decrypt(data, key, mode, passphrase=None):
+    aes_mode = _AES.MODE_GCM if mode == "gcm" else _AES.MODE_EAX
     private_key = _RSA.import_key(key, passphrase)
     enc_session_key = data[: private_key.size_in_bytes()]
     nonce = data[
@@ -32,5 +33,5 @@ def decrypt(data, key, passphrase=None):
     cipher_rsa = _PKCS1_OAEP.new(private_key)
     session_key = cipher_rsa.decrypt(enc_session_key)
 
-    cipher_aes = _AES.new(session_key, _AES.MODE_EAX, nonce)
+    cipher_aes = _AES.new(session_key, aes_mode, nonce)
     return cipher_aes.decrypt_and_verify(ciphertext, tag)

@@ -35,6 +35,8 @@ def config_callback(ctx, param, value):
     null_config = {
         "generate.length": DEFAULT_PASSWORD_LENGTH,
         "generate.character_classes": DEFAULT_CHARACTER_CLASSES,
+        "encrypt.mode": "gcm",
+        "decrypt.mode": "gcm",
     }
     section = ctx.command.name
     key = param.name
@@ -64,7 +66,7 @@ def config_callback(ctx, param, value):
 
 
 @click.group()
-@click.version_option("202001.4")
+@click.version_option("202003.4")
 @click.option(
     "-c",
     "--config-file",
@@ -86,13 +88,20 @@ def cli(ctx, config_file):
     help="The file containing the public key, for encryption",
     callback=config_callback,
 )
+@click.option(
+    "-m",
+    "--mode",
+    type=click.Choice(["eax", "gcm"]),
+    help="AES encryption mode",
+    callback=config_callback,
+)
 @click.argument("file", type=click.File("rb"), required=True, default="-")
 @pass_context
-def encrypt(ctx, public_key_file, file):
+def encrypt(ctx, public_key_file, mode, file):
     data = file.read()
     with open(public_key_file) as f:
         key = f.read()
-    encrypted_data = secrets.encrypt(data, key)
+    encrypted_data = secrets.encrypt(data, key, mode)
 
     click.echo(base64.b64encode(encrypted_data))
 
@@ -119,9 +128,16 @@ def encrypt(ctx, public_key_file, file):
     default=None,
     help="the private key passphrase",
 )
+@click.option(
+    "-m",
+    "--mode",
+    type=click.Choice(["eax", "gcm"]),
+    help="AES encryption mode",
+    callback=config_callback,
+)
 @click.argument("file", type=click.File("rb"), required=True, default="-")
 @pass_context
-def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
+def decrypt(ctx, private_key_file, ask_passphrase, passphrase, mode, file):
     if ask_passphrase and passphrase:
         raise click.UsageError(
             "only one of the 'passphrase' and 'ask-passphrase' can be set "
@@ -132,7 +148,7 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, file):
     data = base64.b64decode(file.read())
     with open(private_key_file) as f:
         key = f.read()
-    click.echo(secrets.decrypt(data, key, secret))
+    click.echo(secrets.decrypt(data, key, mode, secret))
 
 
 @cli.command(help="Generate random password")
@@ -337,10 +353,10 @@ def init(ctx, private_key_file, public_key_file, yes):
     if yes:
         with configuration(ctx.config_file) as config:
             values = [
-                ('generate', 'length', str(DEFAULT_PASSWORD_LENGTH)),
-                ('generate', 'character_clsses', DEFAULT_CHARACTER_CLASSES),
-                ('decrypt', 'private_key_file', private_key_file),
-                ('encrypt', 'public_key_file', public_key_file),
+                ("generate", "length", str(DEFAULT_PASSWORD_LENGTH)),
+                ("generate", "character_clsses", DEFAULT_CHARACTER_CLASSES),
+                ("decrypt", "private_key_file", private_key_file),
+                ("encrypt", "public_key_file", public_key_file),
             ]
             for (section, key, v) in values:
                 if section not in config.sections():
