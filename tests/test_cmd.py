@@ -116,6 +116,21 @@ def test_encrypt_decrypt():
         assert result.output.strip() == "secret"
 
 
+def test_encrypt_decrypt_gcm():
+    with keypair():
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["encrypt", "-p", "rsa.pub", "-m", "gcm"], input="secret"
+        )
+        assert result.exit_code == 0
+        output = result.output
+        result = runner.invoke(
+            cli, ["decrypt", "-r", "rsa.pri", "-m", "gcm"], input=output
+        )
+        assert result.exit_code == 0
+        assert result.output.strip() == "secret"
+
+
 def test_keygen_name():
     with keypair(name="foo"):
         runner = CliRunner()
