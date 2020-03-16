@@ -148,7 +148,7 @@ def decrypt(ctx, private_key_file, ask_passphrase, passphrase, mode, file):
     data = base64.b64decode(file.read())
     with open(private_key_file) as f:
         key = f.read()
-    click.echo(secrets.decrypt(data, key, secret, mode))
+    click.echo(secrets.decrypt(data, key, mode, secret))
 
 
 @cli.command(help="Generate random password")
