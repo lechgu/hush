@@ -35,6 +35,8 @@ def config_callback(ctx, param, value):
     null_config = {
         "generate.length": DEFAULT_PASSWORD_LENGTH,
         "generate.character_classes": DEFAULT_CHARACTER_CLASSES,
+        "encrypt.mode": "gcm",
+        "decrypt.mode": "gcm",
     }
     section = ctx.command.name
     key = param.name
@@ -90,8 +92,8 @@ def cli(ctx, config_file):
     "-m",
     "--mode",
     type=click.Choice(["eax", "gcm"]),
-    required=True,
     help="AES encryption mode",
+    callback=config_callback,
 )
 @click.argument("file", type=click.File("rb"), required=True, default="-")
 @pass_context
@@ -130,8 +132,8 @@ def encrypt(ctx, public_key_file, mode, file):
     "-m",
     "--mode",
     type=click.Choice(["eax", "gcm"]),
-    required=True,
     help="AES encryption mode",
+    callback=config_callback,
 )
 @click.argument("file", type=click.File("rb"), required=True, default="-")
 @pass_context

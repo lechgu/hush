@@ -285,9 +285,11 @@ def test_alterantive_config():
     character_classes = a
     [decrypt]
     private_key_file = foo.pri
+    mode  = eax
 
     [encrypt]
     public_key_file = foo.pub
+    mode = eax
     """
     with keypair("foo"):
         with config_file(lines) as alternative_config:
@@ -298,12 +300,10 @@ def test_alterantive_config():
             assert len(output) == 40
             assert all([x in string.ascii_lowercase for x in output])
             result = runner.invoke(
-                cli, ["encrypt", "-p", "foo.pub", "-m", "gcm"], input="secret"
+                cli, ["encrypt", "-p", "foo.pub"], input="secret"
             )
         assert result.exit_code == 0
         output = result.output
-        result = runner.invoke(
-            cli, ["decrypt", "-r", "foo.pri", "-m", "gcm"], input=output
-        )
+        result = runner.invoke(cli, ["decrypt", "-r", "foo.pri"], input=output)
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
