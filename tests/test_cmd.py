@@ -32,11 +32,18 @@ def config_file(lines):
     os.remove(file_name)
 
 
+@contextmanager
+def temp_file():
+    file_name = mktemp()
+    yield file_name
+    os.remove(file_name)
+
+
 def test_version():
     runner = CliRunner()
     output = runner.invoke(cli, "--version").output.strip()
 
-    assert "202003.4" in output
+    assert "202003.5" in output
 
 
 def test_generate_default():
@@ -276,6 +283,41 @@ def test_change_passphrase_empty():
         )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
+
+
+def test_config_init():
+    runner = CliRunner()
+    with temp_file() as t:
+        with keypair():
+            result = runner.invoke(
+                cli, ["-c", t, "init", "-r", "rsa.pri", "-p", "rsa.pub"],
+            )
+            assert result.exit_code == 0
+            result = runner.invoke(cli, ["-c", t, "config", "encrypt.mode"])
+            assert result.exit_code == 0
+            assert result.output.strip() == "eax"
+
+
+def test_config_init_override():
+    runner = CliRunner()
+    with temp_file() as t:
+        with keypair():
+            result = runner.invoke(
+                cli, ["-c", t, "init", "-r", "rsa.pri", "-p", "rsa.pub"],
+            )
+            assert result.exit_code == 0
+            result = runner.invoke(
+                cli, ["-c", t, "config", "-s", "encrypt.mode", "gcm"]
+            )
+            assert result.exit_code == 0
+            result = runner.invoke(cli, ["-c", t, "config", "encrypt.mode"])
+            assert result.exit_code == 0
+            assert result.output.strip() == "gcm"
+            result = runner.invoke(
+                cli,
+                ["-c", t, "init", "-f", "-r", "rsa.pri", "-p", "rsa.pub",],
+            )
+            assert result.exit_code == 0
 
 
 def test_alterantive_config():

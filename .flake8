@@ -1,5 +1,5 @@
 [flake8]
 exclude = .venv
-ignore = E203
+ignore = E203, E231
 
 [isort]

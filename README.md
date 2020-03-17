@@ -8,9 +8,13 @@ Hush does not require a master password as other password managers do, instead i
 
 #### What's new?
 
+- Version 202003.5 (Mar 17, 2020)
+
+  - Fixed configuration initialization issue
+
 - Version 202003.4 (Mar 6, 2020)
 
-  - introduced GCM mode for the AES encryption. Choose between GCM and EAX. For the secrets encrypted with the previous version explicitly pass `--mode eax` to decrypt.
+  - Introduced GCM mode for the AES encryption. Choose between GCM and EAX. For the secrets encrypted with the previous version explicitly pass `--mode eax` to decrypt.
 
 - Version 202001.4 (Jan 23, 2020)
 
