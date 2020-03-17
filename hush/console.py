@@ -344,23 +344,33 @@ def config(ctx, list, set, val):
     "-p", "--public-key-file", type=str, required=True, help="Public key file",
 )
 @click.option(
-    "--yes", type=bool, help="Overwrite the existing config file if exists.",
+    "-f",
+    "--overwrite",
+    is_flag=True,
+    help="Overwrite the existing config file if exists.",
 )
-def init(ctx, private_key_file, public_key_file, yes):
-    if not yes and os.path.exists(ctx.config_file):
-        yn = click.prompt(f"{ctx.config_file} exists, overwrite? [y/n]")
-        yes = yn.strip() and yn[0].lower() == "y"
-    if yes:
-        with configuration(ctx.config_file) as config:
-            values = [
-                ("generate", "length", str(DEFAULT_PASSWORD_LENGTH)),
-                ("generate", "character_clsses", DEFAULT_CHARACTER_CLASSES),
-                ("decrypt", "private_key_file", private_key_file),
-                ("encrypt", "public_key_file", public_key_file),
-            ]
-            for (section, key, v) in values:
-                if section not in config.sections():
-                    config.add_section(section)
-                config[section][key] = v
+def init(ctx, private_key_file, public_key_file, overwrite):
+    if os.path.exists(ctx.config_file):
+        if overwrite:
+            os.remove(ctx.config_file)
+        else:
+            yn = click.prompt(f"{ctx.config_file} exists, overwrite? [y/n]")
+            yes = yn.strip() and yn[0].lower() == "y"
+            if yes:
+                os.remove(ctx.config_file)
+            else:
+                return
 
-    pass
+    with configuration(ctx.config_file) as config:
+        values = [
+            ("generate", "length", str(DEFAULT_PASSWORD_LENGTH)),
+            ("generate", "character_clsses", DEFAULT_CHARACTER_CLASSES),
+            ("encrypt", "public_key_file", public_key_file),
+            ("encrypt", "mode", "eax"),
+            ("decrypt", "private_key_file", private_key_file),
+            ("decrypt", "mode", "eax"),
+        ]
+        for (section, key, v) in values:
+            if section not in config.sections():
+                config.add_section(section)
+            config[section][key] = v
