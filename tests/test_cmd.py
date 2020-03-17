@@ -32,6 +32,13 @@ def config_file(lines):
     os.remove(file_name)
 
 
+@contextmanager
+def temp_file():
+    file_name = mktemp()
+    yield file_name
+    os.remove(file_name)
+
+
 def test_version():
     runner = CliRunner()
     output = runner.invoke(cli, "--version").output.strip()
@@ -278,6 +285,20 @@ def test_change_passphrase_empty():
         assert result.output.strip() == "secret"
 
 
+def test_config_init():
+    runner = CliRunner()
+    with temp_file() as t:
+        with keypair():
+            result = runner.invoke(
+                cli, ["-c", t, "init", "-r", "rsa.pri", "-p", "rsa.pub"],
+            )
+            assert result.exit_code == 0
+            result = runner.invoke(cli, ["-c", t, "config", "encrypt.mode"])
+            output = result.output
+            assert result.exit_code == 0
+            assert output.strip() == "eax"
+
+
 def test_alterantive_config():
     lines = """
     [generate]
@@ -307,3 +328,4 @@ def test_alterantive_config():
         result = runner.invoke(cli, ["decrypt", "-r", "foo.pri"], input=output)
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
+

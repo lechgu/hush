@@ -359,7 +359,7 @@ def init(ctx, private_key_file, public_key_file, overwrite):
             if yes:
                 os.remove(ctx.config_file)
             else:
-                return
+                return 1
 
     with configuration(ctx.config_file) as config:
         values = [
