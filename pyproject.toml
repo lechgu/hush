@@ -11,7 +11,7 @@ multi_line_output=3
 include_trailing_comma = true
 
 [pycalver]
-current_version = "v202001.0003"
+current_version = "v202003.0004"
 version_pattern = "{pycalver}"
 commit = false
 tag = false
