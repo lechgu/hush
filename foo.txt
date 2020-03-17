@@ -1,0 +1,12 @@
+[generate]
+length = 16
+character_clsses = aA8#
+
+[encrypt]
+public_key_file = foo
+mode = eax
+
+[decrypt]
+private_key_file = foo
+mode = eax
+

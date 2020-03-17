@@ -294,9 +294,30 @@ def test_config_init():
             )
             assert result.exit_code == 0
             result = runner.invoke(cli, ["-c", t, "config", "encrypt.mode"])
-            output = result.output
             assert result.exit_code == 0
-            assert output.strip() == "eax"
+            assert result.output.strip() == "eax"
+
+
+def test_config_init_override():
+    runner = CliRunner()
+    with temp_file() as t:
+        with keypair():
+            result = runner.invoke(
+                cli, ["-c", t, "init", "-r", "rsa.pri", "-p", "rsa.pub"],
+            )
+            assert result.exit_code == 0
+            result = runner.invoke(
+                cli, ["-c", t, "config", "-s", "encrypt.mode", "gcm"]
+            )
+            assert result.exit_code == 0
+            result = runner.invoke(cli, ["-c", t, "config", "encrypt.mode"])
+            assert result.exit_code == 0
+            assert result.output.strip() == "gcm"
+            result = runner.invoke(
+                cli,
+                ["-c", t, "init", "-f", "-r", "rsa.pri", "-p", "rsa.pub",],
+            )
+            assert result.exit_code == 0
 
 
 def test_alterantive_config():
@@ -328,4 +349,3 @@ def test_alterantive_config():
         result = runner.invoke(cli, ["decrypt", "-r", "foo.pri"], input=output)
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
-
