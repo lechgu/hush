@@ -11,7 +11,7 @@ multi_line_output=3
 include_trailing_comma = true
 
 [pycalver]
-current_version = "v202003.0004"
+current_version = "v202003.0005"
 version_pattern = "{pycalver}"
 commit = false
 tag = false
@@ -30,7 +30,7 @@ push = false
 
 [tool.poetry]
 name = "hush"
-version = "202003.4"
+version = "202003.5"
 description = "Minimalistic command line secret management"
 license = "BSD-3-Clause"
 authors = ["Lech Gudalewicz <lechgu@gmail.com>"]

@@ -66,7 +66,7 @@ def config_callback(ctx, param, value):
 
 
 @click.group()
-@click.version_option("202003.4")
+@click.version_option("202003.5")
 @click.option(
     "-c",
     "--config-file",
