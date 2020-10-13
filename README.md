@@ -8,6 +8,10 @@ Hush does not require a master password as other password managers do, instead i
 
 #### What's new?
 
+- Version 202010.7 (Oct 13, 2020)
+
+  - Python 3.9 support
+  
 - Version 202003.5 (Mar 17, 2020)
 
   - Fixed configuration initialization issue
