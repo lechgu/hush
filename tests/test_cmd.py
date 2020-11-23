@@ -43,7 +43,7 @@ def test_version():
     runner = CliRunner()
     output = runner.invoke(cli, "--version").output.strip()
 
-    assert "202010.7" in output
+    assert "2.0.0" in output
 
 
 def test_generate_default():
@@ -186,7 +186,8 @@ def test_add_passphrase():
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
         result = runner.invoke(
-            cli, ["passphrase", "-r", "rsa.pri", "-s", "eax", "--yes"],
+            cli,
+            ["passphrase", "-r", "rsa.pri", "-s", "eax", "--yes"],
         )
         assert result.exit_code == 0
         result = runner.invoke(
@@ -276,7 +277,10 @@ def test_change_passphrase_empty():
         )
         assert result.exit_code == 0
         assert result.output.strip() == "secret"
-        result = runner.invoke(cli, ["passphrase", "-r", "rsa.pri", "--yes"],)
+        result = runner.invoke(
+            cli,
+            ["passphrase", "-r", "rsa.pri", "--yes"],
+        )
         assert result.exit_code == 0
         result = runner.invoke(
             cli, ["decrypt", "-r", "rsa.pri", "-m", "gcm"], input=output
@@ -290,7 +294,8 @@ def test_config_init():
     with temp_file() as t:
         with keypair():
             result = runner.invoke(
-                cli, ["-c", t, "init", "-r", "rsa.pri", "-p", "rsa.pub"],
+                cli,
+                ["-c", t, "init", "-r", "rsa.pri", "-p", "rsa.pub"],
             )
             assert result.exit_code == 0
             result = runner.invoke(cli, ["-c", t, "config", "encrypt.mode"])
@@ -303,7 +308,8 @@ def test_config_init_override():
     with temp_file() as t:
         with keypair():
             result = runner.invoke(
-                cli, ["-c", t, "init", "-r", "rsa.pri", "-p", "rsa.pub"],
+                cli,
+                ["-c", t, "init", "-r", "rsa.pri", "-p", "rsa.pub"],
             )
             assert result.exit_code == 0
             result = runner.invoke(
@@ -315,7 +321,16 @@ def test_config_init_override():
             assert result.output.strip() == "gcm"
             result = runner.invoke(
                 cli,
-                ["-c", t, "init", "-f", "-r", "rsa.pri", "-p", "rsa.pub",],
+                [
+                    "-c",
+                    t,
+                    "init",
+                    "-f",
+                    "-r",
+                    "rsa.pri",
+                    "-p",
+                    "rsa.pub",
+                ],
             )
             assert result.exit_code == 0
 

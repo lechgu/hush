@@ -66,7 +66,7 @@ def config_callback(ctx, param, value):
 
 
 @click.group()
-@click.version_option("202010.7")
+@click.version_option("2.0.0")
 @click.option(
     "-c",
     "--config-file",
@@ -341,7 +341,11 @@ def config(ctx, list, set, val):
     help="Private key file",
 )
 @click.option(
-    "-p", "--public-key-file", type=str, required=True, help="Public key file",
+    "-p",
+    "--public-key-file",
+    type=str,
+    required=True,
+    help="Public key file",
 )
 @click.option(
     "-f",

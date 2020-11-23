@@ -10,27 +10,9 @@ exclude = '''
 multi_line_output=3
 include_trailing_comma = true
 
-[pycalver]
-current_version = "v202010.0006"
-version_pattern = "{pycalver}"
-commit = false
-tag = false
-push = false
-
-[pycalver.file_patterns]
-"pyproject.toml" = [
-    '"{pep440_version}"',
-]
-"hush/console.py"= [
-    '"{pep440_version}"',
-]
-"tests/test_cmd.py"= [
-    '"{pep440_version}"',
-]
-
 [tool.poetry]
 name = "hush"
-version = "202010.7"
+version = "2.0.0"
 description = "Minimalistic command line secret management"
 license = "BSD-3-Clause"
 authors = ["Lech Gudalewicz <lechgu@gmail.com>"]
@@ -44,12 +26,6 @@ pycryptodome = "^3.9.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
-black = "^19.10b0"
-flake8 = "^3.7.9"
-pep8-naming = "^0.9.1"
-twine = "^3.1.1"
-flake8-isort = "^2.8.0"
-pycalver = "^201903.30"
 
 [tool.poetry.scripts]
 hush = 'hush:cli'

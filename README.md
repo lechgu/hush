@@ -8,25 +8,9 @@ Hush does not require a master password as other password managers do, instead i
 
 #### What's new?
 
-- Version 202010.7 (Oct 13, 2020)
+- Version 2.0.0 (Nov 22, 2020)
+  python 3.9 support, dependency update
 
-  - Python 3.9 support
-  
-- Version 202003.5 (Mar 17, 2020)
-
-  - Fixed configuration initialization issue
-
-- Version 202003.4 (Mar 6, 2020)
-
-  - Introduced GCM mode for the AES encryption. Choose between GCM and EAX. For the secrets encrypted with the previous version explicitly pass `--mode eax` to decrypt.
-
-- Version 202001.4 (Jan 23, 2020)
-
-  - Improved compatibility with ssh RSA keys
-
-- Version 202001.3 (Jan 18, 2020)
-
-  - Initial stable release
 
 ### installation
 
